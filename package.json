@@ -1,7 +1,8 @@
 {
   "name": "navigo-react",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "main": "lib/NavigoReact.min.js",
+  "types": "./index.d.ts",
   "devDependencies": {
     "@babel/core": "7.5.0",
     "@babel/plugin-transform-regenerator": "7.4.5",
