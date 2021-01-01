@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { render, screen, waitFor, fireEvent } from "@testing-library/react";
 import { configureRouter, useRoute, useRouter, reset } from "../NavigoReact";
 import "@testing-library/jest-dom/extend-expect";
@@ -49,6 +49,51 @@ describe("Given navigo-react", () => {
     });
   });
   describe("when we use the useRoute hook", () => {
+    it("should add a route every time when we use the hook and remove the route when we unmount the component", async () => {
+      function Wrapper() {
+        const [count, setCount] = useState(0);
+        if (count >= 2 && count < 4) {
+          return (
+            <>
+              <Comp />
+              <button onClick={() => setCount(count + 1)}>button</button>
+            </>
+          );
+        }
+        return <button onClick={() => setCount(count + 1)}>button</button>;
+      }
+      function Comp() {
+        const [match] = useRoute("/foo");
+        return match ? <p>Match</p> : <p>No Match</p>;
+      }
+
+      const { getByText } = render(
+        <div data-testid="container">
+          <Wrapper />
+        </div>
+      );
+
+      fireEvent.click(getByText("button"));
+      expectContent("button");
+      await waitFor(() => {
+        fireEvent.click(getByText("button"));
+      });
+      expectContent("No Matchbutton");
+      expect(useRouter()[0].routes).toHaveLength(1);
+      await waitFor(() => {
+        navigate("/foo");
+      });
+      expectContent("Matchbutton");
+      await waitFor(() => {
+        fireEvent.click(getByText("button"));
+      });
+      await waitFor(() => {
+        fireEvent.click(getByText("button"));
+        fireEvent.click(getByText("button"));
+      });
+      expectContent("button");
+      expect(useRouter()[0].routes).toHaveLength(0);
+    });
     it("should give us a match or false", async () => {
       function Comp() {
         const [match] = useRoute("/foo/:id");
