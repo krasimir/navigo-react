@@ -1,7 +1,7 @@
 import React from "react";
 import styled from "styled-components";
 
-import { useRouter } from "./navigo/NavigoReact";
+import { useRouter } from "../../../src/NavigoReact";
 
 const Link = styled.a`
   display: inline-block;
@@ -17,7 +17,7 @@ export default function Navigation() {
 
   return (
     <nav>
-      <Link href="/" data-navigo>
+      <Link href="/foobar" data-navigo>
         Home
       </Link>
       <Link href="/about" data-navigo>

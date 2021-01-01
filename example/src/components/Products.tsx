@@ -1,7 +1,7 @@
 import { Match } from "navigo";
 import React from "react";
 
-import { useRoute } from "./navigo/NavigoReact";
+import { useRoute } from "../../../src/NavigoReact";
 
 export default function Products() {
   const [match] = useRoute("/products/:type");

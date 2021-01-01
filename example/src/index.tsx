@@ -1,6 +1,6 @@
 import ReactDOM from "react-dom";
 import React from "react";
-import { configureRouter } from "./components/navigo/NavigoReact";
+import { configureRouter } from "../../src/NavigoReact";
 
 import App from "./components/App";
 
