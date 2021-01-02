@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { render, screen, waitFor, fireEvent } from "@testing-library/react";
-import { configureRouter, useRoute, useRouter, reset } from "../NavigoReact";
+import { configureRouter, useRoute, useRouter, reset, Route } from "../NavigoReact";
 import "@testing-library/jest-dom/extend-expect";
 
 const ROOT = "something";
@@ -23,6 +23,7 @@ describe("Given navigo-react", () => {
   beforeEach(() => {
     reset();
     warn = jest.spyOn(console, "warn").mockImplementation(() => {});
+    history.pushState({}, "", "/");
   });
   afterEach(() => {
     if (warn) {
@@ -111,6 +112,24 @@ describe("Given navigo-react", () => {
         useRouter()[0].navigate("/foo/bar");
       });
       expect(screen.queryByText("Matching bar")).toBeTruthy();
+    });
+    it("should give us proper Match object if the path matches on the first render", async () => {
+      history.pushState({}, "", "/foo/bar");
+      function Comp() {
+        const [match] = useRoute("/foo/:id");
+        if (match) {
+          // @ts-ignore
+          return <p>Matching {match.data.id}</p>;
+        }
+        return <p>Nope</p>;
+      }
+
+      render(
+        <div data-testid="container">
+          <Comp />
+        </div>
+      );
+      expectContent("Matching bar");
     });
     describe("and we have multiple components using the hook", () => {
       it("should properly resolve the paths", async () => {
@@ -213,6 +232,34 @@ describe("Given navigo-react", () => {
         fireEvent.click(getByText("home"));
         expectContent("click me");
       });
+    });
+  });
+  describe("when using the Route component", () => {
+    it("should render the children if the path matches", async () => {
+      configureRouter("/app");
+      history.pushState({}, "", "/app/foo/bar");
+      function CompA() {
+        const [match] = useRoute("/foo/:id");
+        if (match) {
+          // @ts-ignore
+          return <p>A</p>;
+        }
+        return null;
+      }
+      function CompB() {
+        return <p>B</p>;
+      }
+
+      render(
+        <div data-testid="container">
+          <CompA />
+          <Route path="/foo/:id">
+            <CompB />
+          </Route>
+        </div>
+      );
+      // await delay();
+      expectContent("AB");
     });
   });
 });

@@ -5062,10 +5062,10 @@ natural-compare@^1.4.0:
   resolved "https://registry.yarnpkg.com/natural-compare/-/natural-compare-1.4.0.tgz#4abebfeed7541f2c27acfb29bdbbd15c8d5ba4f7"
   integrity sha1-Sr6/7tdUHywnrPspvbvRXI1bpPc=
 
-navigo@8.0.0-beta.26:
-  version "8.0.0-beta.26"
-  resolved "https://registry.yarnpkg.com/navigo/-/navigo-8.0.0-beta.26.tgz#d84e6194c045081149cf4e225c66245e25867dec"
-  integrity sha512-hhozHlTDO9a0LDM1RuEG56ua1S35/hIdN+pIWixu8m8qw+MVKXGzsw8JQEjXQIYLqTlMsP9yxq0RC4iXCF3pyg==
+navigo@8.0.0-beta.27:
+  version "8.0.0-beta.27"
+  resolved "https://registry.yarnpkg.com/navigo/-/navigo-8.0.0-beta.27.tgz#770c666e7199982238ef035e8c74be0becb71c30"
+  integrity sha512-6mMYHF96OnRnFmSLUOGhM2NwYJfnmD/7Hq/KLURdKu+O9eXxf5DMA6hDhlE0UPLP2V371DFgnoMHWY9iTRbFOA==
 
 negotiator@0.6.2:
   version "0.6.2"

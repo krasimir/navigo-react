@@ -43,7 +43,7 @@ export function useRoute(path: string): [false | Match] {
         },
       })
       .updatePageLinks();
-    nextTick(() => getRouter().resolve());
+    getRouter().resolve();
     return () => {
       getRouter().off(handler.current);
     };

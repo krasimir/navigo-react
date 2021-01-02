@@ -34,7 +34,7 @@
     "webpack-dev-server": "3.10.3"
   },
   "dependencies": {
-    "navigo": "8.0.0-beta.26"
+    "navigo": "8.0.0-beta.27"
   },
   "scripts": {
     "start": "webpack-dev-server --config ./example/webpack.config.example.js",
