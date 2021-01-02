@@ -57,7 +57,7 @@ describe("Given navigo-react", () => {
         </div>
       );
 
-      expect(CompB).toBeCalledTimes(2);
+      expect(CompB).toBeCalledTimes(1);
       expect(CompB.mock.calls[0][0]).toStrictEqual({
         a: "b",
       });

@@ -1,7 +1,7 @@
 import "@testing-library/jest-dom/extend-expect";
 import React, { useState } from "react";
 import { render, screen, waitFor, fireEvent } from "@testing-library/react";
-import { configureRouter, useRoute, useRouter, reset, useMatch } from "../NavigoReact";
+import { configureRouter, useRoute, useRouter, reset, useMatch, Route } from "../NavigoReact";
 
 import { expectContent, navigate, delay } from "./utils";
 
@@ -249,6 +249,97 @@ describe("Given navigo-react", () => {
         await delay();
         fireEvent.click(getByText("home"));
         expectContent("click me");
+      });
+    });
+    describe("and we pass some hooks", () => {
+      it("should pass the hooks to navigo", async () => {
+        history.pushState({}, "", "/foo/bar");
+        const hooks = {
+          before: jest.fn().mockImplementation((done) => done()),
+          after: jest.fn(),
+          leave: jest.fn().mockImplementation((done) => done()),
+        };
+        function Comp() {
+          const match = useRoute("/foo/:id", hooks);
+          if (match) {
+            // @ts-ignore
+            return <p>Matching {match.data.id}</p>;
+          }
+          return <p>Nope</p>;
+        }
+
+        render(
+          <div data-testid="container">
+            <Comp />
+          </div>
+        );
+
+        expectContent("Matching bar");
+        await waitFor(() => {
+          navigate("/nah");
+        });
+        expectContent("Nope");
+      });
+      describe("and we decide to block the routing (with `before` hook)", () => {
+        it("should not allow the transition", async () => {
+          history.pushState({}, "", "/foo/bar");
+          const hooks = {
+            before: jest.fn().mockImplementation((done) => done(false)),
+          };
+          function Comp() {
+            const match = useRoute("/foo/:id", hooks);
+            if (match) {
+              // @ts-ignore
+              return <p>Matching {match.data.id}</p>;
+            }
+            return <p>Nope</p>;
+          }
+
+          render(
+            <div data-testid="container">
+              <Comp />
+            </div>
+          );
+
+          expectContent("Nope");
+        });
+      });
+      describe("and we decide to block the routing (with `leave` hook)", () => {
+        it("should not allow the transition", async () => {
+          history.pushState({}, "", "/foo/bar");
+          const hooks = {
+            leave: jest.fn().mockImplementation((done) => {
+              setTimeout(() => {
+                waitFor(() => {
+                  done(false);
+                });
+              }, 10);
+            }),
+          };
+          function Comp() {
+            const match = useRoute("/foo/:id", hooks);
+            if (match) {
+              // @ts-ignore
+              return <p>Matching {match.data.id}</p>;
+            }
+            return <p>Nope</p>;
+          }
+
+          render(
+            <div data-testid="container">
+              <Comp />
+              <Route path="/about">About</Route>
+            </div>
+          );
+
+          expectContent("Matching bar");
+          await waitFor(() => {
+            navigate("/about");
+          });
+          expectContent("Matching bar");
+          await delay(20);
+          expectContent("Nope");
+        });
       });
     });
   });
