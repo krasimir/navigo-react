@@ -13,11 +13,11 @@ const Link = styled.a`
 `;
 
 export default function Navigation() {
-  const [router] = useRouter();
+  const router = useRouter();
 
   return (
     <nav>
-      <Link href="/foobar" data-navigo>
+      <Link href="/" data-navigo>
         Home
       </Link>
       <Link href="/about" data-navigo>
@@ -30,6 +30,9 @@ export default function Navigation() {
         One
       </Link>
       <Link onClick={() => router.navigate("/products/two")}>Two</Link>
+      <Link data-navigo href="/foobar">
+        No match
+      </Link>
     </nav>
   );
 }

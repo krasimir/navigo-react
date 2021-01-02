@@ -2,10 +2,10 @@ import React from "react";
 
 import { useRoute } from "../../../src/NavigoReact";
 
-export default function Team() {
-  const match = useRoute("/about/team");
+export default function About() {
+  const match = useRoute("/about");
   if (match) {
-    return <p>Team page</p>;
+    return <p>About</p>;
   }
   return null;
 }

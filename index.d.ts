@@ -7,6 +7,7 @@ export type RouteProps = {
 
 export function configureRouter(root: string): Navigo;
 export function reset(): void;
-export function useRoute(path: string): [false | Match];
-export function useRouter(): [Navigo];
+export function useRoute(path: string): false | Match;
+export function useRouter(): Navigo;
+export function useMatch(): false | Match;
 export function Route(props: RouteProps);

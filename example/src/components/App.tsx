@@ -28,7 +28,10 @@ export default function App() {
         <hr />
         Team page footer
       </Route>
-      <Route path="/">home</Route>
+      <Route path="/">
+        <hr />
+        Home
+      </Route>
     </Container>
   );
 }
