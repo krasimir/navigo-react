@@ -1,12 +1,10 @@
 import React, { useRef, useEffect, useState, useContext } from "react";
 import Navigo, { Match, RouteHooks } from "navigo";
 
-type ContextType = {
-  match: false | Match;
-};
+import { RouteProps, NavigoContextType, Path, NotFoundRouteProps } from "../index.d";
 
 let router: Navigo | undefined;
-let Context = React.createContext({ match: false } as ContextType);
+let Context = React.createContext({ match: false } as NavigoContextType);
 
 function getRouter(root?: string): Navigo {
   if (router) {
@@ -59,11 +57,11 @@ export function reset() {
 }
 
 // components
-export function Base({ path }: { path: string }) {
+export function Base({ path }: Path) {
   getRouter(path);
   return null;
 }
-export function Route({ path, children, hooks }: { path: string; children: any; hooks?: RouteHooks }) {
+export function Route({ path, children, hooks }: RouteProps) {
   const match = useRoute(path, hooks);
 
   if (match) {
@@ -71,7 +69,7 @@ export function Route({ path, children, hooks }: { path: string; children: any; 
   }
   return null;
 }
-export function NotFound({ children, hooks }: { children: any; hooks?: RouteHooks }) {
+export function NotFound({ children, hooks }: NotFoundRouteProps) {
   const match = useNotFound(hooks);
 
   if (match) {
@@ -79,7 +77,7 @@ export function NotFound({ children, hooks }: { children: any; hooks?: RouteHook
   }
   return null;
 }
-export function Redirect({ path }: { path: string }) {
+export function Redirect({ path }: Path) {
   useEffect(() => {
     useRouter().navigate(path);
   }, []);

@@ -1,6 +1,6 @@
 {
   "name": "navigo-react",
-  "version": "0.1.3",
+  "version": "0.2.0",
   "main": "lib/NavigoReact.min.js",
   "types": "./index.d.ts",
   "devDependencies": {
