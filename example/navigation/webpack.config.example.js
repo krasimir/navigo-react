@@ -9,7 +9,7 @@ module.exports = {
   module: {
     rules: [
       {
-        test: /\.(js)$/,
+        test: /\.(js|tsx)$/,
         exclude: /node_modules/,
         use: ["babel-loader"],
       },
@@ -22,6 +22,9 @@ module.exports = {
   },
   resolve: {
     extensions: [".tsx", ".ts", ".js"],
+    alias: {
+      "navigo-react$": path.resolve(__dirname + "/../../src/NavigoReact.tsx"),
+    },
   },
   output: {
     path: `${__dirname}/public`,

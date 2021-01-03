@@ -1,7 +1,7 @@
 import React from "react";
 import styled from "styled-components";
 
-import { Route } from "../../../src/NavigoReact";
+import { Route } from "navigo-react";
 import Navigation from "./Navigation";
 import About from "./About";
 import Products from "./Products";

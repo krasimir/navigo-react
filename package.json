@@ -37,7 +37,6 @@
     "navigo": "8.0.0-beta.32"
   },
   "scripts": {
-    "start": "webpack-dev-server --config ./example/webpack.config.example.js",
     "build": "yarn test && webpack --config ./webpack.config.js",
     "test": "./node_modules/.bin/jest ./src/__tests__/*.spec.tsx",
     "test-watch": "./node_modules/.bin/jest ./src/__tests__/*.spec.tsx --watch"

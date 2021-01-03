@@ -1,7 +1,7 @@
 import React from "react";
 import styled from "styled-components";
 
-import { useRouter } from "../../../src/NavigoReact";
+import { useRouter } from "navigo-react";
 
 const Link = styled.a`
   display: inline-block;

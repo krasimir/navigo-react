@@ -1,7 +1,7 @@
 import { Match } from "navigo/index.d";
 import "@testing-library/jest-dom/extend-expect";
 import React, { useEffect, useRef, useState } from "react";
-import { render, waitFor } from "@testing-library/react";
+import { render, fireEvent, waitFor } from "@testing-library/react";
 import { configureRouter, useRouter, reset, Route, useMatch, NotFound, Redirect, useRoute } from "../NavigoReact";
 
 import { expectContent, delay } from "../__tests_helpers__/utils";
@@ -129,6 +129,70 @@ describe("Given navigo-react", () => {
       expectContent("Login");
       await delay(20);
       expectContent("About");
+    });
+  });
+  describe("when we want implement a page transition", () => {
+    it("should be possible to do it via the `leave` hook (using the Route component)", async () => {
+      const hooks = {
+        leave(done: Function) {
+          setTimeout(() => waitFor(() => done()), 10);
+        },
+      };
+      function Home() {
+        const match = useMatch();
+        return (
+          <p>
+            <a href="/card-two" data-navigo>
+              click me
+            </a>
+          </p>
+        );
+      }
+      const { getByText } = render(
+        <div data-testid="container">
+          <Route path="/" hooks={hooks}>
+            <Home />
+          </Route>
+        </div>
+      );
+
+      expectContent("click me");
+      await delay(); // we need to wait for the microtask of the updatePageLinks
+      fireEvent.click(getByText("click me"));
+      expectContent("click me");
+      await delay(20);
+      expectContent("");
+    });
+    it("should be possible to do it via the `leave` hook (using the useRoute hook)", async () => {
+      function Home() {
+        const match = useRoute("/", {
+          leave(done: Function) {
+            setTimeout(() => waitFor(() => done()), 10);
+          },
+        });
+        if (match) {
+          return (
+            <p>
+              <a href="/card-two" data-navigo>
+                click me
+              </a>
+            </p>
+          );
+        }
+        return null;
+      }
+      const { getByText } = render(
+        <div data-testid="container">
+          <Home />
+        </div>
+      );
+
+      expectContent("click me");
+      await delay(); // we need to wait for the microtask of the updatePageLinks
+      fireEvent.click(getByText("click me"));
+      expectContent("click me");
+      await delay(20);
+      expectContent("");
     });
   });
 });
