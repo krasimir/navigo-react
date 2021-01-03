@@ -1,9 +1,10 @@
 import "@testing-library/jest-dom/extend-expect";
 import React, { useState } from "react";
 import { render, screen, waitFor, fireEvent } from "@testing-library/react";
-import { configureRouter, useRoute, useRouter, reset, useMatch, Route } from "../NavigoReact";
+import { configureRouter, useRoute, useRouter, reset, useMatch, Route, useNotFound, useLocation } from "../NavigoReact";
 
-import { expectContent, navigate, delay } from "./utils";
+import { expectContent, navigate, delay } from "../__tests_helpers__/utils";
+import About from "../__tests_helpers__/components/About";
 
 const ROOT = "something";
 let warn: jest.SpyInstance;
@@ -67,7 +68,7 @@ describe("Given navigo-react", () => {
       expectContent("Nope");
     });
   });
-  describe("when we use the useRoute hook", () => {
+  describe("when we use the `useRoute` hook", () => {
     it("should add a route every time when we use the hook and remove the route when we unmount the component", async () => {
       function Wrapper() {
         const [count, setCount] = useState(0);
@@ -340,6 +341,64 @@ describe("Given navigo-react", () => {
           await delay(20);
           expectContent("Nope");
         });
+      });
+    });
+  });
+  describe("when we use the `useNotFound` hook", () => {
+    it("should return a Match or a `false`", async () => {
+      history.pushState({}, "", "/about");
+      const spy = jest.fn();
+      function Comp() {
+        const match = useNotFound();
+        if (match) {
+          spy(match);
+          // @ts-ignore
+          return <p>not found</p>;
+        }
+        return null;
+      }
+
+      render(
+        <div data-testid="container">
+          <About />
+          <Comp />
+        </div>
+      );
+
+      expectContent("About");
+      await waitFor(() => {
+        navigate("/nah");
+      });
+      expectContent("not found");
+      expect(spy).toBeCalledTimes(1);
+      expect(spy).toBeCalledWith({
+        url: "nah",
+        queryString: "",
+        data: null,
+        route: {
+          name: "__NOT_FOUND__",
+          path: "nah",
+          handler: expect.any(Function),
+          hooks: expect.any(Object),
+        },
+        params: null,
+      });
+    });
+  });
+  describe("when we use the `useLocation` hook", () => {
+    it("should gives us access to the current location of the browser", () => {
+      history.pushState({}, "", "/about?a=b");
+      expect(useLocation()).toStrictEqual({
+        url: "about",
+        queryString: "a=b",
+        route: {
+          name: "about",
+          path: "about",
+          handler: expect.any(Function),
+          hooks: undefined,
+        },
+        data: null,
+        params: { a: "b" },
       });
     });
   });

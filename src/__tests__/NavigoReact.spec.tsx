@@ -1,13 +1,13 @@
 import { Match } from "navigo/index.d";
 import "@testing-library/jest-dom/extend-expect";
-import React, { useState } from "react";
-import { render, screen, waitFor, fireEvent } from "@testing-library/react";
-import { configureRouter, useRoute, useRouter, reset, Route, useMatch } from "../NavigoReact";
+import React, { useEffect, useRef, useState } from "react";
+import { render, waitFor } from "@testing-library/react";
+import { configureRouter, useRouter, reset, Route, useMatch, NotFound, Redirect, useRoute } from "../NavigoReact";
 
-import { expectContent, navigate, delay } from "./utils";
+import { expectContent, delay } from "../__tests_helpers__/utils";
 
-import About from "./components/About";
-import Team from "./components/Team";
+import About from "../__tests_helpers__/components/About";
+import Team from "../__tests_helpers__/components/Team";
 
 const ROOT = "something";
 let warn: jest.SpyInstance;
@@ -80,6 +80,54 @@ describe("Given navigo-react", () => {
       await waitFor(() => {
         useRouter().navigate("/about");
       });
+      expectContent("About");
+    });
+  });
+  describe("when we want to redirect (in case of not-found path)", () => {
+    it("should provide an API for redirecting", async () => {
+      history.pushState({}, "", "/nah");
+      render(
+        <div data-testid="container">
+          <About />
+          <NotFound>
+            <Redirect path="about" />
+          </NotFound>
+        </div>
+      );
+      expectContent("About");
+    });
+  });
+  describe("when we want to redirect (in case of not authorized access)", () => {
+    it("should provide an API for redirecting", async () => {
+      history.pushState({}, "", "/about");
+      const Auth = ({ children }: { children: any }) => {
+        const [authorized, setAuthorized] = useState(false);
+        const location = useRef(useRouter().getCurrentLocation());
+
+        useEffect(() => {
+          setTimeout(() => {
+            waitFor(() => {
+              setAuthorized(true);
+              useRouter().navigate(location.current.url);
+            });
+          }, 10);
+        }, []);
+
+        if (authorized) {
+          return children;
+        }
+        return <Redirect path="login" />;
+      };
+      render(
+        <div data-testid="container">
+          <Auth>
+            <About />
+          </Auth>
+          <Route path="login">Login</Route>
+        </div>
+      );
+      expectContent("Login");
+      await delay(20);
       expectContent("About");
     });
   });

@@ -1,10 +1,11 @@
 import { Match } from "navigo/index.d";
 import "@testing-library/jest-dom/extend-expect";
-import React, { useState } from "react";
-import { render, screen, waitFor, fireEvent } from "@testing-library/react";
-import { configureRouter, useRoute, useRouter, reset, Route, useMatch } from "../NavigoReact";
+import React from "react";
+import { render, waitFor } from "@testing-library/react";
+import { useRoute, useRouter, reset, Route, useMatch, Base, NotFound, useNotFound, Redirect } from "../NavigoReact";
 
-import { expectContent } from "./utils";
+import { expectContent, navigate } from "../__tests_helpers__/utils";
+import About from "../__tests_helpers__/components/About";
 
 const ROOT = "something";
 let warn: jest.SpyInstance;
@@ -20,9 +21,15 @@ describe("Given navigo-react", () => {
       warn.mockReset();
     }
   });
+  describe("when using the Base component", () => {
+    it("should allow us to set the root of the router", () => {
+      render(<Base path="foo/bar" />);
+      // @ts-ignore
+      expect(useRouter().root).toEqual("foo/bar");
+    });
+  });
   describe("when using the Route component", () => {
     it("should render the children if the path matches on the first render", async () => {
-      configureRouter("/app");
       history.pushState({}, "", "/app/foo/bar");
       function CompA() {
         const match = useRoute("/foo/:id");
@@ -34,6 +41,7 @@ describe("Given navigo-react", () => {
 
       render(
         <div data-testid="container">
+          <Base path="app" />
           <CompA />
           <Route path="/foo/:id">
             <p>B</p>
@@ -61,6 +69,55 @@ describe("Given navigo-react", () => {
       expect(CompB.mock.calls[0][0]).toStrictEqual({
         a: "b",
       });
+    });
+  });
+  describe("when using the NotFound component", () => {
+    it("should allow us to handle the not-found route", async () => {
+      history.pushState({}, "", "/about");
+      const spy = jest.fn();
+      function Comp() {
+        const match = useMatch();
+        if (match) {
+          spy(match);
+        }
+        return <p>not found</p>;
+      }
+
+      render(
+        <div data-testid="container">
+          <About />
+          <NotFound>
+            <Comp />
+          </NotFound>
+        </div>
+      );
+
+      expectContent("About");
+      await waitFor(() => {
+        navigate("/nah");
+      });
+      expectContent("not found");
+      expect(spy).toBeCalledTimes(1);
+      expect(spy).toBeCalledWith({
+        url: "nah",
+        queryString: "",
+        data: null,
+        route: {
+          name: "__NOT_FOUND__",
+          path: "nah",
+          handler: expect.any(Function),
+          hooks: expect.any(Object),
+        },
+        params: null,
+      });
+    });
+  });
+  describe("when using the Redirect component", () => {
+    it("should navigate to a path", () => {
+      useRouter().on("foo/bar/moo", () => {});
+      expect(useRouter().lastResolved()).toEqual(null);
+      render(<Redirect path="/foo/bar/moo" />);
+      expect(useRouter().lastResolved()).toStrictEqual([expect.objectContaining({ url: "foo/bar/moo" })]);
     });
   });
 });

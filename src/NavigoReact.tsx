@@ -59,12 +59,30 @@ export function reset() {
 }
 
 // components
+export function Base({ path }: { path: string }) {
+  getRouter(path);
+  return null;
+}
 export function Route({ path, children, hooks }: { path: string; children: any; hooks?: RouteHooks }) {
   const match = useRoute(path, hooks);
 
   if (match) {
     return <Context.Provider value={{ match }}>{children}</Context.Provider>;
   }
+  return null;
+}
+export function NotFound({ children, hooks }: { children: any; hooks?: RouteHooks }) {
+  const match = useNotFound(hooks);
+
+  if (match) {
+    return <Context.Provider value={{ match }}>{children}</Context.Provider>;
+  }
+  return null;
+}
+export function Redirect({ path }: { path: string }) {
+  useEffect(() => {
+    useRouter().navigate(path);
+  }, []);
   return null;
 }
 
@@ -97,4 +115,29 @@ export function useRouter(): Navigo {
 }
 export function useMatch(): false | Match {
   return useContext(Context).match;
+}
+export function useNotFound(hooks?: RouteHooks | undefined): false | Match {
+  const [match, setMatch] = useState<false | Match>(false);
+  const handler = useRef((match: false | Match) => {
+    setMatch(match);
+    nextTick(() => getRouter().updatePageLinks());
+  });
+
+  useEffect(() => {
+    // @ts-ignore
+    getRouter().notFound(
+      handler.current,
+      composeRouteHooks(() => setMatch(false), hooks)
+    );
+    getRouter().resolve();
+    getRouter().updatePageLinks();
+    return () => {
+      getRouter().off(handler.current);
+    };
+  }, []);
+
+  return match;
+}
+export function useLocation(): Match {
+  return getRouter().getCurrentLocation();
 }
