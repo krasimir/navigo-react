@@ -4,5 +4,5 @@ Run `yarn` in the root of the repo. Then go into the example's directory and run
 
 ---
 
-* [Basic navigation](./navigation)
+* [Basic navigation](./basic)
 * [Transition between pages](./transitions)

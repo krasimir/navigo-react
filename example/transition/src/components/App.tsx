@@ -1,6 +1,5 @@
 import React from "react";
 import styled from "styled-components";
-import { Route } from "navigo-react";
 
 import Home from "./Home";
 import CardTwo from "./CardTwo";

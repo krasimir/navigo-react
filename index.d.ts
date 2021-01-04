@@ -12,6 +12,10 @@ export type NotFoundRouteProps = {
 export type NavigoContextType = {
   match: false | Match;
 };
+export type NavigoSwitchContextType = {
+  isInSwitch: boolean;
+  switchMatch: false | Match;
+};
 export type Path = { path: string };
 
 // utils
@@ -23,6 +27,7 @@ export function Base(props: Path);
 export function Route(props: RouteProps);
 export function NotFound(props: NotFoundRouteProps);
 export function Redirect(props: Path);
+export function Switch(props: { children: any });
 
 // hooks
 export function useRoute(path: string, hooks?: RouteHooks | undefined): false | Match;

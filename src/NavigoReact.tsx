@@ -1,10 +1,12 @@
 import React, { useRef, useEffect, useState, useContext } from "react";
 import Navigo, { Match, RouteHooks } from "navigo";
 
-import { RouteProps, NavigoContextType, Path, NotFoundRouteProps } from "../index.d";
+import { RouteProps, NavigoContextType, Path, NotFoundRouteProps, NavigoSwitchContextType } from "../index.d";
+import { render } from "react-dom";
 
 let router: Navigo | undefined;
 let Context = React.createContext({ match: false } as NavigoContextType);
+let SwitchContext = React.createContext({ isInSwitch: false, switchMatch: false } as NavigoSwitchContextType);
 
 function getRouter(root?: string): Navigo {
   if (router) {
@@ -61,11 +63,27 @@ export function Base({ path }: Path) {
   getRouter(path);
   return null;
 }
+export function Switch({ children }: { children: any }) {
+  useRoute("*"); // just so we can re-render when the route changes
+  return <SwitchContext.Provider value={{ switchMatch: false, isInSwitch: true }}>{children}</SwitchContext.Provider>;
+}
 export function Route({ path, children, hooks }: RouteProps) {
+  const switchContext = useContext(SwitchContext);
+  const { isInSwitch, switchMatch } = switchContext;
   const match = useRoute(path, hooks);
+  const renderChild = () => <Context.Provider value={{ match }}>{children}</Context.Provider>;
 
-  if (match) {
-    return <Context.Provider value={{ match }}>{children}</Context.Provider>;
+  if (isInSwitch && match) {
+    if (switchMatch) {
+      if (switchMatch && match.route.path === (switchMatch as Match).route.path) {
+        return renderChild();
+      }
+    } else {
+      switchContext.switchMatch = match;
+      return renderChild();
+    }
+  } else if (match) {
+    return renderChild();
   }
   return null;
 }

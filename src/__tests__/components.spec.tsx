@@ -2,7 +2,18 @@ import { Match } from "navigo/index.d";
 import "@testing-library/jest-dom/extend-expect";
 import React from "react";
 import { render, waitFor } from "@testing-library/react";
-import { useRoute, useRouter, reset, Route, useMatch, Base, NotFound, useNotFound, Redirect } from "../NavigoReact";
+import {
+  useRoute,
+  useRouter,
+  reset,
+  Route,
+  useMatch,
+  Base,
+  NotFound,
+  useNotFound,
+  Redirect,
+  Switch,
+} from "../NavigoReact";
 
 import { expectContent, navigate } from "../__tests_helpers__/utils";
 import About from "../__tests_helpers__/components/About";
@@ -118,6 +129,37 @@ describe("Given navigo-react", () => {
       expect(useRouter().lastResolved()).toEqual(null);
       render(<Redirect path="/foo/bar/moo" />);
       expect(useRouter().lastResolved()).toStrictEqual([expect.objectContaining({ url: "foo/bar/moo" })]);
+    });
+  });
+  describe("when using the Switch component", () => {
+    it("should resolve only one of the routes in the list", async () => {
+      render(
+        <div data-testid="container">
+          <Switch>
+            <Route path="/foo">A</Route>
+            <Route path="/bar">B</Route>
+            <Route path="/">C</Route>
+            <Route path="*">D</Route>
+          </Switch>
+          <div>
+            <Route path="/bar">E</Route>
+          </div>
+        </div>
+      );
+
+      expectContent("C");
+      await waitFor(() => {
+        navigate("bar");
+      });
+      expectContent("BE");
+      await waitFor(() => {
+        navigate("nope");
+      });
+      expectContent("D");
+      await waitFor(() => {
+        navigate("foo");
+      });
+      expectContent("A");
     });
   });
 });
