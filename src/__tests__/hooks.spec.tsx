@@ -395,7 +395,7 @@ describe("Given navigo-react", () => {
           name: "about",
           path: "about",
           handler: expect.any(Function),
-          hooks: undefined,
+          hooks: {},
         },
         data: null,
         params: { a: "b" },
