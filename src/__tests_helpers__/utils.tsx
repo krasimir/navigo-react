@@ -1,11 +1,11 @@
 import "@testing-library/jest-dom/extend-expect";
 import { screen, waitFor } from "@testing-library/react";
-import { useRouter } from "../../src/NavigoReact";
+import { getRouter } from "../../src/NavigoReact";
 
 export async function navigate(path: string) {
   // @ts-ignore
   await waitFor(() => {
-    useRouter().navigate(path);
+    getRouter().navigate(path);
   });
 }
 export async function delay(ms?: number) {

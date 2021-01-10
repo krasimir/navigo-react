@@ -1,9 +1,9 @@
 import React from "react";
 
-import { useRoute } from "../../../src/NavigoReact";
+import { useMatch } from "../../../src/NavigoReact";
 
 export default function Team() {
-  const match = useRoute("/about/team");
+  const match = useMatch();
   if (match) {
     return <p>Team</p>;
   }

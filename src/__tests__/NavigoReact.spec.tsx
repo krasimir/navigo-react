@@ -2,7 +2,7 @@ import { Match } from "navigo/index.d";
 import "@testing-library/jest-dom/extend-expect";
 import React, { useEffect, useRef, useState } from "react";
 import { render, fireEvent, waitFor } from "@testing-library/react";
-import { configureRouter, useRouter, reset, Route, useMatch, NotFound, Redirect, useRoute } from "../NavigoReact";
+import { configureRouter, getRouter, reset, Route, useMatch, NotFound, Redirect } from "../NavigoReact";
 
 import { expectContent, delay } from "../__tests_helpers__/utils";
 
@@ -56,11 +56,11 @@ describe("Given navigo-react", () => {
       );
       expectContent("");
       await waitFor(() => {
-        useRouter().navigate("/foo/20");
+        getRouter().navigate("/foo/20");
       });
       expectContent("A");
       await waitFor(() => {
-        useRouter().navigate("/foo/20/save");
+        getRouter().navigate("/foo/20/save");
       });
       expectContent("AB20");
     });
@@ -71,14 +71,18 @@ describe("Given navigo-react", () => {
 
       render(
         <div data-testid="container">
-          <About />
-          <Team />
+          <Route path="/about" loose>
+            <About />
+          </Route>
+          <Route path="/about/team" loose>
+            <Team />
+          </Route>
           <Route path="/about/team">Team-footer</Route>
         </div>
       );
       expectContent("TeamTeam-footer");
       await waitFor(() => {
-        useRouter().navigate("/about");
+        getRouter().navigate("/about");
       });
       expectContent("About");
     });
@@ -88,7 +92,9 @@ describe("Given navigo-react", () => {
       history.pushState({}, "", "/nah");
       render(
         <div data-testid="container">
-          <About />
+          <Route path="/about" loose>
+            <About />
+          </Route>
           <NotFound>
             <Redirect path="about" />
           </NotFound>
@@ -102,13 +108,13 @@ describe("Given navigo-react", () => {
       history.pushState({}, "", "/about");
       const Auth = ({ children }: { children: any }) => {
         const [authorized, setAuthorized] = useState(false);
-        const location = useRef(useRouter().getCurrentLocation());
+        const location = useRef(getRouter().getCurrentLocation());
 
         useEffect(() => {
           setTimeout(() => {
             waitFor(() => {
               setAuthorized(true);
-              useRouter().navigate(location.current.url);
+              getRouter().navigate(location.current.url);
             });
           }, 10);
         }, []);
@@ -121,7 +127,9 @@ describe("Given navigo-react", () => {
       render(
         <div data-testid="container">
           <Auth>
-            <About />
+            <Route path="/about" loose>
+              <About />
+            </Route>
           </Auth>
           <Route path="login">Login</Route>
         </div>
@@ -129,70 +137,6 @@ describe("Given navigo-react", () => {
       expectContent("Login");
       await delay(20);
       expectContent("About");
-    });
-  });
-  describe("when we want implement a page transition", () => {
-    it("should be possible to do it via the `leave` hook (using the Route component)", async () => {
-      const hooks = {
-        leave(done: Function) {
-          setTimeout(() => waitFor(() => done()), 10);
-        },
-      };
-      function Home() {
-        const match = useMatch();
-        return (
-          <p>
-            <a href="/card-two" data-navigo>
-              click me
-            </a>
-          </p>
-        );
-      }
-      const { getByText } = render(
-        <div data-testid="container">
-          <Route path="/" hooks={hooks}>
-            <Home />
-          </Route>
-        </div>
-      );
-
-      expectContent("click me");
-      await delay(); // we need to wait for the microtask of the updatePageLinks
-      fireEvent.click(getByText("click me"));
-      expectContent("click me");
-      await delay(20);
-      expectContent("");
-    });
-    it("should be possible to do it via the `leave` hook (using the useRoute hook)", async () => {
-      function Home() {
-        const match = useRoute("/", {
-          leave(done: Function) {
-            setTimeout(() => waitFor(() => done()), 10);
-          },
-        });
-        if (match) {
-          return (
-            <p>
-              <a href="/card-two" data-navigo>
-                click me
-              </a>
-            </p>
-          );
-        }
-        return null;
-      }
-      const { getByText } = render(
-        <div data-testid="container">
-          <Home />
-        </div>
-      );
-
-      expectContent("click me");
-      await delay(); // we need to wait for the microtask of the updatePageLinks
-      fireEvent.click(getByText("click me"));
-      expectContent("click me");
-      await delay(20);
-      expectContent("");
     });
   });
 });

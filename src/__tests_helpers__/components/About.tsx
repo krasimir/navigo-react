@@ -1,9 +1,9 @@
 import React from "react";
 
-import { useRoute } from "../../../src/NavigoReact";
+import { useMatch } from "../../../src/NavigoReact";
 
 export default function About() {
-  const match = useRoute("/about");
+  const match = useMatch();
   if (match) {
     return <p>About</p>;
   }

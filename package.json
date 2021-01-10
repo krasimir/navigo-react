@@ -1,6 +1,6 @@
 {
   "name": "navigo-react",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "main": "lib/NavigoReact.min.js",
   "types": "./index.d.ts",
   "devDependencies": {
@@ -34,7 +34,7 @@
     "webpack-dev-server": "3.10.3"
   },
   "dependencies": {
-    "navigo": "8.3.0"
+    "navigo": "8.3.2"
   },
   "scripts": {
     "build": "yarn test && webpack --config ./webpack.config.js",
