@@ -31,9 +31,7 @@
     "typescript": "3.8.3",
     "webpack": "4.41.6",
     "webpack-cli": "3.1.2",
-    "webpack-dev-server": "3.10.3"
-  },
-  "dependencies": {
+    "webpack-dev-server": "3.10.3",
     "navigo": "8.3.2"
   },
   "scripts": {

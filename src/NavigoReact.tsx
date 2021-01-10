@@ -32,14 +32,6 @@ export function reset() {
 }
 
 // components
-export function Base({ path }: Path) {
-  getRouter(path);
-  return null;
-}
-export function Switch({ children }: { children: any }) {
-  useRoute("*"); // just so we can re-render when the route changes
-  return <SwitchContext.Provider value={{ switchMatch: false, isInSwitch: true }}>{children}</SwitchContext.Provider>;
-}
 export function Route({ path, children, loose }: RouteProps) {
   const switchContext = useContext(SwitchContext);
   const { isInSwitch, switchMatch } = switchContext;
@@ -48,9 +40,7 @@ export function Route({ path, children, loose }: RouteProps) {
 
   if (loose) {
     return renderChild();
-  }
-
-  if (isInSwitch && match) {
+  } else if (isInSwitch && match) {
     if (switchMatch) {
       if (switchMatch && match.route.path === (switchMatch as Match).route.path) {
         return renderChild();
@@ -63,6 +53,14 @@ export function Route({ path, children, loose }: RouteProps) {
     return renderChild();
   }
   return null;
+}
+export function Base({ path }: Path) {
+  getRouter(path);
+  return null;
+}
+export function Switch({ children }: { children: any }) {
+  useRoute("*"); // just so we can re-render when the route changes
+  return <SwitchContext.Provider value={{ switchMatch: false, isInSwitch: true }}>{children}</SwitchContext.Provider>;
 }
 export function NotFound({ children, hooks }: NotFoundRouteProps) {
   const match = useNotFound(hooks);
