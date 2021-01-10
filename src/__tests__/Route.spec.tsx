@@ -2,12 +2,10 @@ import React, { useState } from "react";
 import { Match } from "navigo/index.d";
 import "@testing-library/jest-dom/extend-expect";
 import { render, waitFor, fireEvent, screen } from "@testing-library/react";
-import { getRouter, reset, Route, useMatch, Base, NotFound, Redirect, Switch, configureRouter } from "../NavigoReact";
+import { getRouter, reset, Route, useMatch, Base, configureRouter } from "../NavigoReact";
 
 import { expectContent, navigate, delay } from "../__tests_helpers__/utils";
-import About from "../__tests_helpers__/components/About";
 
-const ROOT = "something";
 let warn: jest.SpyInstance;
 
 describe("Given navigo-react", () => {
@@ -20,13 +18,6 @@ describe("Given navigo-react", () => {
     if (warn) {
       warn.mockReset();
     }
-  });
-  describe("when using the Base component", () => {
-    it("should allow us to set the root of the router", () => {
-      render(<Base path="foo/bar" />);
-      // @ts-ignore
-      expect(getRouter().root).toEqual("foo/bar");
-    });
   });
   describe("when using the Route component", () => {
     it("should render the children if the path matches on the first render", async () => {
@@ -250,88 +241,6 @@ describe("Given navigo-react", () => {
         fireEvent.click(getByText("home"));
         expectContent("click me");
       });
-    });
-  });
-  describe("when using the NotFound component", () => {
-    it("should allow us to handle the not-found route", async () => {
-      history.pushState({}, "", "/about");
-      const spy = jest.fn();
-      function Comp() {
-        const match = useMatch();
-        if (match) {
-          spy(match);
-        }
-        return <p>not found</p>;
-      }
-
-      render(
-        <div data-testid="container">
-          <Route path="/about" loose>
-            <About />
-          </Route>
-          <NotFound>
-            <Comp />
-          </NotFound>
-        </div>
-      );
-
-      expectContent("About");
-      await waitFor(() => {
-        navigate("/nah");
-      });
-      expectContent("not found");
-      expect(spy).toBeCalledTimes(1);
-      expect(spy).toBeCalledWith({
-        url: "nah",
-        queryString: "",
-        data: null,
-        route: {
-          name: "__NOT_FOUND__",
-          path: "nah",
-          handler: expect.any(Function),
-          hooks: expect.any(Object),
-        },
-        params: null,
-      });
-    });
-  });
-  describe("when using the Redirect component", () => {
-    it("should navigate to a path", () => {
-      getRouter().on("foo/bar/moo", () => {});
-      expect(getRouter().lastResolved()).toEqual(null);
-      render(<Redirect path="/foo/bar/moo" />);
-      expect(getRouter().lastResolved()).toStrictEqual([expect.objectContaining({ url: "foo/bar/moo" })]);
-    });
-  });
-  describe("when using the Switch component", () => {
-    it("should resolve only one of the routes in the list", async () => {
-      render(
-        <div data-testid="container">
-          <Switch>
-            <Route path="/foo">A</Route>
-            <Route path="/bar">B</Route>
-            <Route path="/">C</Route>
-            <Route path="*">D</Route>
-          </Switch>
-          <div>
-            <Route path="/bar">E</Route>
-          </div>
-        </div>
-      );
-
-      expectContent("C");
-      await waitFor(() => {
-        navigate("bar");
-      });
-      expectContent("BE");
-      await waitFor(() => {
-        navigate("nope");
-      });
-      expectContent("D");
-      await waitFor(() => {
-        navigate("foo");
-      });
-      expectContent("A");
     });
   });
 });
