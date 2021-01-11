@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Match } from "navigo/index.d";
 import "@testing-library/jest-dom/extend-expect";
 import { render, waitFor, fireEvent, screen } from "@testing-library/react";
-import { getRouter, reset, Route, useMatch, Base, configureRouter } from "../NavigoReact";
+import { getRouter, reset, Route, useNavigo, Base, configureRouter } from "../NavigoReact";
 
 import { expectContent, navigate, delay } from "../__tests_helpers__/utils";
 
@@ -23,7 +23,7 @@ describe("Given navigo-react", () => {
     it("should render the children if the path matches on the first render", async () => {
       history.pushState({}, "", "/app/foo/bar");
       function CompA() {
-        const match = useMatch();
+        const { match } = useNavigo();
         if (match) {
           return <p>A</p>;
         }
@@ -46,7 +46,7 @@ describe("Given navigo-react", () => {
     it("should gives us access to the Match object", () => {
       history.pushState({}, "", "/foo/bar");
       const CompB = jest.fn().mockImplementation(() => {
-        const match = useMatch() as Match;
+        const { match } = useNavigo();
         // @ts-ignore
         return <p>B{match.data.id}</p>;
       });
@@ -79,7 +79,7 @@ describe("Given navigo-react", () => {
         return <button onClick={() => setCount(count + 1)}>button</button>;
       }
       function Comp() {
-        const match = useMatch();
+        const { match } = useNavigo();
         return match ? <p>Match</p> : <p>No Match</p>;
       }
 
@@ -113,7 +113,7 @@ describe("Given navigo-react", () => {
     it("should give us proper Match object if the path matches on the first render", async () => {
       history.pushState({}, "", "/foo/bar");
       function Comp() {
-        const match = useMatch();
+        const { match } = useNavigo();
         if (match) {
           // @ts-ignore
           return <p>Matching {match.data.id}</p>;
@@ -133,7 +133,7 @@ describe("Given navigo-react", () => {
     describe("and we have multiple components", () => {
       it("should properly resolve the paths", async () => {
         function CompA() {
-          const match = useMatch();
+          const { match } = useNavigo();
           if (match) {
             // @ts-ignore
             return <p>About</p>;
@@ -141,7 +141,7 @@ describe("Given navigo-react", () => {
           return null;
         }
         function CompB() {
-          const match = useMatch();
+          const { match } = useNavigo();
           if (match) {
             // @ts-ignore
             return <p>Products</p>;
@@ -167,7 +167,7 @@ describe("Given navigo-react", () => {
       });
       it("should resolve even tho there is the same path in multiple components", async () => {
         function CompA() {
-          const match = useMatch();
+          const { match } = useNavigo();
           if (match) {
             // @ts-ignore
             return <p>About1</p>;
@@ -175,7 +175,7 @@ describe("Given navigo-react", () => {
           return null;
         }
         function CompB() {
-          const match = useMatch();
+          const { match } = useNavigo();
           if (match) {
             // @ts-ignore
             return <p>About2</p>;
@@ -211,7 +211,7 @@ describe("Given navigo-react", () => {
           );
         }
         function CompB() {
-          const match = useMatch();
+          const { match } = useNavigo();
           if (match) {
             // @ts-ignore
             return (
@@ -241,6 +241,44 @@ describe("Given navigo-react", () => {
         fireEvent.click(getByText("home"));
         expectContent("click me");
       });
+    });
+  });
+  describe("when passing a `before` function", () => {
+    fit("should create a before hook and allow us to send props to useNavigo hook", async () => {
+      history.pushState({}, "", "/about");
+      function Comp() {
+        const { match, myName } = useNavigo();
+
+        if (match) {
+          return <p>Hello, {myName}</p>;
+        }
+        if (myName) {
+          return <p>Hey, {myName}</p>;
+        }
+        return <p>Nope</p>;
+      }
+
+      render(
+        <div data-testid="container">
+          <Route
+            path="/about"
+            loose
+            before={async (done: Function) => {
+              done({ myName: "Krasimir" });
+              await delay(10);
+              waitFor(() => {
+                done(true);
+              });
+            }}
+          >
+            <Comp />
+          </Route>
+        </div>
+      );
+
+      expectContent("Hey, Krasimir");
+      await delay(20);
+      expectContent("Hello, Krasimir");
     });
   });
 });

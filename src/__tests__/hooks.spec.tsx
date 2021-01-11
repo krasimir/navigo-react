@@ -1,7 +1,7 @@
 import "@testing-library/jest-dom/extend-expect";
 import React from "react";
 import { render } from "@testing-library/react";
-import { reset, useMatch, useLocation } from "../NavigoReact";
+import { reset, useNavigo, useLocation } from "../NavigoReact";
 
 import { expectContent } from "../__tests_helpers__/utils";
 
@@ -19,10 +19,10 @@ describe("Given navigo-react", () => {
       warn.mockReset();
     }
   });
-  describe("when using the `useMatch` hook", () => {
-    it("should return `false` from `useMatch` if there is no match or a context", () => {
+  describe("when using the `useNavigo` hook", () => {
+    it("should return `false` from `useNavigo` if there is no match or a context", () => {
       const CompA = jest.fn().mockImplementation(() => {
-        const match = useMatch();
+        const { match } = useNavigo();
         if (!match) {
           return <p>Nope</p>;
         }
@@ -37,9 +37,9 @@ describe("Given navigo-react", () => {
       expect(CompA).toBeCalledTimes(1);
       expectContent("Nope");
     });
-    it("should return `false` from `useMatch` if there is no match or a context", () => {
+    it("should return `false` from `useNavigo` if there is no match or a context", () => {
       const CompA = jest.fn().mockImplementation(() => {
-        const match = useMatch();
+        const { match } = useNavigo();
         if (!match) {
           return <p>Nope</p>;
         }

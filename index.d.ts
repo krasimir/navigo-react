@@ -4,19 +4,21 @@ export type RouteProps = {
   path: string;
   children: any;
   loose?: boolean;
+  before?: Function;
 };
 export type NotFoundRouteProps = {
   children: any;
   hooks?: RouteHooks;
-};
-export type NavigoContextType = {
-  match: false | Match;
 };
 export type NavigoSwitchContextType = {
   isInSwitch: boolean;
   switchMatch: false | Match;
 };
 export type Path = { path: string };
+export type NavigoRouting = {
+  match: false | Match;
+  [key: string]: Any;
+};
 
 // utils
 export function configureRouter(root: string): Navigo;
@@ -31,5 +33,5 @@ export function Redirect(props: Path);
 export function Switch(props: { children: any });
 
 // hooks
-export function useMatch(): false | Match;
+export function useNavigo(): NavigoRouting;
 export function useLocation(): Match;

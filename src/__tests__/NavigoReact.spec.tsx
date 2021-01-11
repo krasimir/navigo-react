@@ -2,7 +2,7 @@ import { Match } from "navigo/index.d";
 import "@testing-library/jest-dom/extend-expect";
 import React, { useEffect, useRef, useState } from "react";
 import { render, fireEvent, waitFor } from "@testing-library/react";
-import { configureRouter, getRouter, reset, Route, useMatch, NotFound, Redirect } from "../NavigoReact";
+import { configureRouter, getRouter, reset, Route, useNavigo, NotFound, Redirect } from "../NavigoReact";
 
 import { expectContent, delay } from "../__tests_helpers__/utils";
 
@@ -31,9 +31,9 @@ describe("Given navigo-react", () => {
     });
   });
   describe("when we want to implement a nesting routes", () => {
-    it("should be possible to do it by using Route and useMatch", async () => {
+    it("should be possible to do it by using Route and useNavigo", async () => {
       function CompA() {
-        const match = useMatch();
+        const { match } = useNavigo();
         if (!match) return null;
         // @ts-ignore
         const id = match.data.id;

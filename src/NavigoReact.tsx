@@ -1,10 +1,10 @@
-import React, { useRef, useEffect, useState, useContext } from "react";
+import React, { useRef, useEffect, useState, useContext, useReducer } from "react";
 import Navigo, { Match, RouteHooks } from "navigo";
 
-import { RouteProps, NavigoContextType, Path, NotFoundRouteProps, NavigoSwitchContextType } from "../index.d";
+import { RouteProps, Path, NotFoundRouteProps, NavigoSwitchContextType, NavigoRouting } from "../index.d";
 
 let router: Navigo | undefined;
-let Context = React.createContext({ match: false } as NavigoContextType);
+let Context = React.createContext({ match: false } as NavigoRouting);
 let SwitchContext = React.createContext({ isInSwitch: false, switchMatch: false } as NavigoSwitchContextType);
 
 export function getRouter(root?: string): Navigo {
@@ -32,24 +32,66 @@ export function reset() {
 }
 
 // components
-export function Route({ path, children, loose }: RouteProps) {
+export function Route({ path, children, loose, before }: RouteProps) {
+  const [context, setContext] = useReducer(
+    (state: NavigoRouting, action: NavigoRouting) => {
+      return { ...state, ...action };
+    },
+    { match: false }
+  );
+  const handler = useRef((match: false | Match) => {
+    setContext({ match });
+    nextTick(() => getRouter().updatePageLinks());
+  });
+
+  useEffect(() => {
+    const router = getRouter();
+    // creating the route
+    router.on(path, handler.current);
+    // before hooking
+    if (before) {
+      router.addBeforeHook(path, (done: Function) => {
+        (before as Function)((result: any) => {
+          if (typeof result === "boolean") {
+            done(result);
+          } else if (typeof result === "object" && result !== null) {
+            Object.keys(result).forEach((key) => {
+              context[key] = result[key];
+            });
+            setContext(context);
+          }
+        });
+      });
+    }
+    // adding the service leave hook
+    router.addLeaveHook(path, (done: Function) => {
+      setContext({ match: false });
+      done();
+    });
+    // initial resolving
+    router.resolve();
+    // initial data-navigo set up
+    router.updatePageLinks();
+    return () => {
+      router.off(handler.current);
+    };
+  }, []);
   const switchContext = useContext(SwitchContext);
   const { isInSwitch, switchMatch } = switchContext;
-  const match = useRoute(path);
-  const renderChild = () => <Context.Provider value={{ match }}>{children}</Context.Provider>;
+  const renderChild = () => <Context.Provider value={context}>{children}</Context.Provider>;
 
   if (loose) {
     return renderChild();
-  } else if (isInSwitch && match) {
+  } else if (isInSwitch && context.match) {
     if (switchMatch) {
-      if (switchMatch && match.route.path === (switchMatch as Match).route.path) {
+      if (switchMatch && context.match.route.path === (switchMatch as Match).route.path) {
         return renderChild();
       }
     } else {
-      switchContext.switchMatch = match;
+      switchContext.switchMatch = context.match;
       return renderChild();
     }
-  } else if (match) {
+  } else if (context.match) {
     return renderChild();
   }
   return null;
@@ -78,38 +120,14 @@ export function Redirect({ path }: Path) {
 }
 
 // hooks
-export function useMatch(): false | Match {
-  return useContext(Context).match;
+export function useNavigo(): NavigoRouting {
+  return useContext(Context);
 }
 export function useLocation(): Match {
   return getRouter().getCurrentLocation();
 }
 
 // internal hooks
-function useRoute(path: string): false | Match {
-  const [match, setMatch] = useState<false | Match>(false);
-  const handler = useRef((match: false | Match) => {
-    setMatch(match);
-    nextTick(() => getRouter().updatePageLinks());
-  });
-
-  useEffect(() => {
-    // @ts-ignore
-    const router = getRouter();
-    router.on(path, handler.current);
-    router.addLeaveHook(path, (done: Function) => {
-      setMatch(false);
-      done();
-    });
-    router.resolve();
-    router.updatePageLinks();
-    return () => {
-      router.off(handler.current);
-    };
-  }, []);
-
-  return match;
-}
 function useNotFound(hooks?: RouteHooks | undefined): false | Match {
   const [match, setMatch] = useState<false | Match>(false);
   const handler = useRef((match: false | Match) => {

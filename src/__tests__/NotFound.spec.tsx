@@ -1,7 +1,7 @@
 import React from "react";
 import "@testing-library/jest-dom/extend-expect";
 import { render, waitFor } from "@testing-library/react";
-import { reset, Route, useMatch, NotFound } from "../NavigoReact";
+import { reset, Route, useNavigo, NotFound } from "../NavigoReact";
 
 import { expectContent, navigate } from "../__tests_helpers__/utils";
 import About from "../__tests_helpers__/components/About";
@@ -24,7 +24,7 @@ describe("Given navigo-react", () => {
       history.pushState({}, "", "/about");
       const spy = jest.fn();
       function Comp() {
-        const match = useMatch();
+        const { match } = useNavigo();
         if (match) {
           spy(match);
         }
