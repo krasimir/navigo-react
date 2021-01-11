@@ -13,6 +13,7 @@ export type NotFoundRouteProps = {
 export type NavigoSwitchContextType = {
   isInSwitch: boolean;
   switchMatch: false | Match;
+  setSwitchMatch: Function;
 };
 export type Path = { path: string };
 export type NavigoRouting = {

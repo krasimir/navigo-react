@@ -39,7 +39,11 @@ export function Route({ path, children, loose, before }: RouteProps) {
     },
     { match: false }
   );
+  const switchContext = useContext(SwitchContext);
+  const { isInSwitch, switchMatch, setSwitchMatch } = switchContext;
+
   const handler = useRef((match: false | Match) => {
+    setSwitchMatch(match);
     setContext({ match });
     nextTick(() => getRouter().updatePageLinks());
   });
@@ -76,10 +80,10 @@ export function Route({ path, children, loose, before }: RouteProps) {
       router.off(handler.current);
     };
   }, []);
-  const switchContext = useContext(SwitchContext);
-  const { isInSwitch, switchMatch } = switchContext;
+
   const renderChild = () => <Context.Provider value={context}>{children}</Context.Provider>;
 
+  console.log(path, isInSwitch, `context.match=${!!context.match}`, `switch match=${!!switchMatch}`);
   if (loose) {
     return renderChild();
   } else if (isInSwitch && context.match) {
@@ -88,7 +92,6 @@ export function Route({ path, children, loose, before }: RouteProps) {
         return renderChild();
       }
     } else {
-      switchContext.switchMatch = context.match;
       return renderChild();
     }
   } else if (context.match) {
@@ -101,8 +104,12 @@ export function Base({ path }: Path) {
   return null;
 }
 export function Switch({ children }: { children: any }) {
-  useRoute("*"); // just so we can re-render when the route changes
-  return <SwitchContext.Provider value={{ switchMatch: false, isInSwitch: true }}>{children}</SwitchContext.Provider>;
+  const [switchMatch, setSwitchMatch] = useState<false | Match>(false);
+  return (
+    <SwitchContext.Provider value={{ switchMatch, isInSwitch: true, setSwitchMatch }}>
+      {children}
+    </SwitchContext.Provider>
+  );
 }
 export function NotFound({ children, hooks }: NotFoundRouteProps) {
   const match = useNotFound(hooks);

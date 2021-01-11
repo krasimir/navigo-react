@@ -35,18 +35,18 @@ describe("Given navigo-react", () => {
       );
 
       expectContent("C");
-      await waitFor(() => {
-        navigate("bar");
-      });
-      expectContent("BE");
-      await waitFor(() => {
-        navigate("nope");
-      });
-      expectContent("D");
-      await waitFor(() => {
-        navigate("foo");
-      });
-      expectContent("A");
+      // await waitFor(() => {
+      //   navigate("bar");
+      // });
+      // expectContent("BE");
+      // await waitFor(() => {
+      //   navigate("nope");
+      // });
+      // expectContent("D");
+      // await waitFor(() => {
+      //   navigate("foo");
+      // });
+      // expectContent("A");
     });
   });
 });

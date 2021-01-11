@@ -244,7 +244,7 @@ describe("Given navigo-react", () => {
     });
   });
   describe("when passing a `before` function", () => {
-    fit("should create a before hook and allow us to send props to useNavigo hook", async () => {
+    it("should create a before hook and allow us to send props to useNavigo hook", async () => {
       history.pushState({}, "", "/about");
       function Comp() {
         const { match, myName } = useNavigo();
