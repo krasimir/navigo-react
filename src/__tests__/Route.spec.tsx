@@ -265,7 +265,11 @@ describe("Given navigo-react", () => {
             loose
             before={async (done: Function) => {
               done({ myName: "Krasimir" });
-              await delay(10);
+              await delay(5);
+              waitFor(() => {
+                done({ myName: "Tsonev" });
+              });
+              await delay(5);
               waitFor(() => {
                 done(true);
               });
@@ -277,8 +281,193 @@ describe("Given navigo-react", () => {
       );
 
       expectContent("Hey, Krasimir");
+      await delay(7);
+      expectContent("Hey, Tsonev");
       await delay(20);
-      expectContent("Hello, Krasimir");
+      expectContent("Hello, Tsonev");
+    });
+    it("should allow us to block the routing", async () => {
+      history.pushState({}, "", "/");
+      function Comp() {
+        const { match } = useNavigo();
+
+        if (match) {
+          return <p>About</p>;
+        }
+        return <p>Nope</p>;
+      }
+
+      render(
+        <div data-testid="container">
+          <Route
+            path="/about"
+            loose
+            before={async (done: Function) => {
+              done(false);
+            }}
+          >
+            <Comp />
+          </Route>
+        </div>
+      );
+
+      expectContent("Nope");
+      getRouter().navigate("/about");
+      expectContent("Nope");
+      expect(location.pathname).toEqual("/");
+    });
+  });
+  describe("when passing `after`", () => {
+    it("should create an after hook and allow us to send props to useNavigo hook", async () => {
+      history.pushState({}, "", "/");
+      function Comp() {
+        const { match, userName } = useNavigo();
+
+        if (match && userName) {
+          return <p>Hey, {userName}</p>;
+        }
+        return <p>Nope</p>;
+      }
+
+      render(
+        <div data-testid="container">
+          <Route
+            path="/about"
+            loose
+            after={async (done: Function) => {
+              done({ userName: "Foo Bar" });
+            }}
+          >
+            <Comp />
+          </Route>
+        </div>
+      );
+
+      expectContent("Nope");
+      await waitFor(() => {
+        getRouter().navigate("/about");
+      });
+      expectContent("Hey, Foo Bar");
+    });
+  });
+  describe("when passing `already`", () => {
+    it("should create an already hook and allow us to send props to useNavigo hook", async () => {
+      history.pushState({}, "", "/");
+      function Comp() {
+        const { match, again } = useNavigo();
+
+        if (match && again) {
+          return <p>Rendering again</p>;
+        }
+        return <p>Nope</p>;
+      }
+
+      render(
+        <div data-testid="container">
+          <Route
+            path="/about"
+            loose
+            already={async (done: Function) => {
+              done({ again: true });
+            }}
+          >
+            <Comp />
+          </Route>
+        </div>
+      );
+
+      expectContent("Nope");
+      await waitFor(() => {
+        getRouter().navigate("/about");
+        getRouter().navigate("/about");
+      });
+      expectContent("Rendering again");
+    });
+  });
+  describe("when passing a `leave` function", () => {
+    it("should create a leave hook and allow us to send props to useNavigo hook", async () => {
+      history.pushState({}, "", "/");
+      function Comp() {
+        const { match, leaving } = useNavigo();
+
+        if (leaving) {
+          return <p>Leaving...</p>;
+        }
+        if (match) {
+          return <p>Match</p>;
+        }
+        return <p>Nope</p>;
+      }
+
+      render(
+        <div data-testid="container">
+          <Route
+            path="/about"
+            loose
+            leave={async (done: Function) => {
+              done({ leaving: true });
+              await delay(10);
+              waitFor(() => {
+                done({ leaving: false });
+                done(true);
+              });
+            }}
+          >
+            <Comp />
+          </Route>
+        </div>
+      );
+
+      expectContent("Nope");
+      await waitFor(() => {
+        getRouter().navigate("/about");
+      });
+      expectContent("Match");
+      await waitFor(() => {
+        getRouter().navigate("/nah");
+      });
+      expectContent("Leaving...");
+      await delay(20);
+      expectContent("Nope");
+    });
+    it("should allow us to block the routing", async () => {
+      history.pushState({}, "", "/");
+      function Comp() {
+        const { match, leaving } = useNavigo();
+
+        if (leaving) {
+          return <p>Leaving...</p>;
+        }
+        if (match) {
+          return <p>Match</p>;
+        }
+        return <p>Nope</p>;
+      }
+
+      render(
+        <div data-testid="container">
+          <Route
+            path="/about"
+            loose
+            leave={async (done: Function) => {
+              done(false);
+            }}
+          >
+            <Comp />
+          </Route>
+        </div>
+      );
+
+      expectContent("Nope");
+      await waitFor(() => {
+        getRouter().navigate("/about");
+      });
+      expectContent("Match");
+      await waitFor(() => {
+        getRouter().navigate("/nah");
+      });
+      expectContent("Match");
+      expect(location.pathname).toEqual("/about");
     });
   });
 });

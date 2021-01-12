@@ -1,7 +1,7 @@
 import React from "react";
 import "@testing-library/jest-dom/extend-expect";
 import { render, waitFor } from "@testing-library/react";
-import { reset, Route, Switch } from "../NavigoReact";
+import { reset, Route, Switch, getRouter } from "../NavigoReact";
 
 import { expectContent, navigate, delay } from "../__tests_helpers__/utils";
 
@@ -35,18 +35,18 @@ describe("Given navigo-react", () => {
       );
 
       expectContent("C");
-      // await waitFor(() => {
-      //   navigate("bar");
-      // });
-      // expectContent("BE");
-      // await waitFor(() => {
-      //   navigate("nope");
-      // });
-      // expectContent("D");
-      // await waitFor(() => {
-      //   navigate("foo");
-      // });
-      // expectContent("A");
+      await waitFor(() => {
+        navigate("bar");
+      });
+      expectContent("BE");
+      await waitFor(() => {
+        navigate("nope");
+      });
+      expectContent("D");
+      await waitFor(() => {
+        navigate("foo");
+      });
+      expectContent("A");
     });
   });
 });

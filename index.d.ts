@@ -5,6 +5,9 @@ export type RouteProps = {
   children: any;
   loose?: boolean;
   before?: Function;
+  after?: Function;
+  already?: Function;
+  leave?: Function;
 };
 export type NotFoundRouteProps = {
   children: any;
@@ -13,7 +16,6 @@ export type NotFoundRouteProps = {
 export type NavigoSwitchContextType = {
   isInSwitch: boolean;
   switchMatch: false | Match;
-  setSwitchMatch: Function;
 };
 export type Path = { path: string };
 export type NavigoRouting = {

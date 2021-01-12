@@ -2,6 +2,7 @@ import React, { useRef, useEffect, useState, useContext, useReducer } from "reac
 import Navigo, { Match, RouteHooks } from "navigo";
 
 import { RouteProps, Path, NotFoundRouteProps, NavigoSwitchContextType, NavigoRouting } from "../index.d";
+import { loadPartialConfig } from "@babel/core";
 
 let router: Navigo | undefined;
 let Context = React.createContext({ match: false } as NavigoRouting);
@@ -32,43 +33,53 @@ export function reset() {
 }
 
 // components
-export function Route({ path, children, loose, before }: RouteProps) {
-  const [context, setContext] = useReducer(
-    (state: NavigoRouting, action: NavigoRouting) => {
-      return { ...state, ...action };
-    },
-    { match: false }
-  );
+export function Route({ path, children, loose, before, after, already, leave }: RouteProps) {
+  const [context, setContext] = useReducer((state: NavigoRouting, action: NavigoRouting) => ({ ...state, ...action }), {
+    match: false,
+  });
   const switchContext = useContext(SwitchContext);
-  const { isInSwitch, switchMatch, setSwitchMatch } = switchContext;
-
   const handler = useRef((match: false | Match) => {
-    setSwitchMatch(match);
     setContext({ match });
     nextTick(() => getRouter().updatePageLinks());
   });
+  const renderChild = () => <Context.Provider value={context}>{children}</Context.Provider>;
+  const noneBlockingHook = (func: Function) => (match: Match) => {
+    func((result: any) => {
+      if (typeof result === "object" && result !== null) {
+        setContext(result);
+      }
+    }, match);
+  };
+  const blockingHook = (func: Function) => (done: Function, match: Match) => {
+    func((result: any) => {
+      if (typeof result === "boolean") {
+        done(result);
+      } else if (typeof result === "object" && result !== null) {
+        setContext(result);
+      }
+    }, match);
+  };
 
   useEffect(() => {
     const router = getRouter();
     // creating the route
     router.on(path, handler.current);
-    // before hooking
+    const navigoRoute = router.getRoute(handler.current);
+    // hooking
     if (before) {
-      router.addBeforeHook(path, (done: Function) => {
-        (before as Function)((result: any) => {
-          if (typeof result === "boolean") {
-            done(result);
-          } else if (typeof result === "object" && result !== null) {
-            Object.keys(result).forEach((key) => {
-              context[key] = result[key];
-            });
-            setContext(context);
-          }
-        });
-      });
+      router.addBeforeHook(navigoRoute, blockingHook(before));
+    }
+    if (after) {
+      router.addAfterHook(navigoRoute, noneBlockingHook(after));
+    }
+    if (already) {
+      router.addAlreadyHook(navigoRoute, noneBlockingHook(already));
+    }
+    if (leave) {
+      router.addLeaveHook(navigoRoute, blockingHook(leave));
     }
     // adding the service leave hook
-    router.addLeaveHook(path, (done: Function) => {
+    router.addLeaveHook(navigoRoute, (done: Function) => {
       setContext({ match: false });
       done();
     });
@@ -81,17 +92,15 @@ export function Route({ path, children, loose, before }: RouteProps) {
     };
   }, []);
 
-  const renderChild = () => <Context.Provider value={context}>{children}</Context.Provider>;
-
-  console.log(path, isInSwitch, `context.match=${!!context.match}`, `switch match=${!!switchMatch}`);
   if (loose) {
     return renderChild();
-  } else if (isInSwitch && context.match) {
-    if (switchMatch) {
-      if (switchMatch && context.match.route.path === (switchMatch as Match).route.path) {
+  } else if (switchContext.isInSwitch && context.match) {
+    if (switchContext.switchMatch) {
+      if (switchContext.switchMatch.route.path === context.match.route.path) {
         return renderChild();
       }
     } else {
+      switchContext.switchMatch = context.match;
       return renderChild();
     }
   } else if (context.match) {
@@ -104,9 +113,21 @@ export function Base({ path }: Path) {
   return null;
 }
 export function Switch({ children }: { children: any }) {
-  const [switchMatch, setSwitchMatch] = useState<false | Match>(false);
+  const [match, setMatch] = useState<Match | false>(false);
+  useEffect(() => {
+    function switchHandler(match: Match) {
+      setMatch(match);
+    }
+    getRouter().on("*", switchHandler);
+    return () => {
+      getRouter().off(switchHandler);
+    };
+  }, []);
   return (
-    <SwitchContext.Provider value={{ switchMatch, isInSwitch: true, setSwitchMatch }}>
+    <SwitchContext.Provider
+      value={{ switchMatch: false, isInSwitch: true }}
+      key={match ? match.url : `switch${new Date().getTime()}`}
+    >
       {children}
     </SwitchContext.Provider>
   );
