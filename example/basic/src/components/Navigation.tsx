@@ -1,7 +1,7 @@
 import React from "react";
 import styled from "styled-components";
 
-import { useRouter } from "navigo-react";
+import { getRouter } from "navigo-react";
 
 const Link = styled.a`
   display: inline-block;
@@ -13,8 +13,6 @@ const Link = styled.a`
 `;
 
 export default function Navigation() {
-  const router = useRouter();
-
   return (
     <nav>
       <Link href="/" data-navigo>
@@ -29,7 +27,7 @@ export default function Navigation() {
       <Link href="/products/one" data-navigo>
         One
       </Link>
-      <Link onClick={() => router.navigate("/products/two")}>Two</Link>
+      <Link onClick={() => getRouter().navigate("/products/two")}>Two</Link>
       <Link data-navigo href="/foobar">
         No match
       </Link>

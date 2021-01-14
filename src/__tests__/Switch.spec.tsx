@@ -1,7 +1,7 @@
 import React from "react";
 import "@testing-library/jest-dom/extend-expect";
 import { render, waitFor } from "@testing-library/react";
-import { reset, Route, Switch, getRouter } from "../NavigoReact";
+import { reset, Route, Switch, getRouter, configureRouter } from "../NavigoReact";
 
 import { expectContent, navigate, delay } from "../__tests_helpers__/utils";
 
@@ -47,6 +47,30 @@ describe("Given navigo-react", () => {
         navigate("foo");
       });
       expectContent("A");
+    });
+    describe("and when we have a router root set", () => {
+      it("should resolve only one of the routes in the list #2", async () => {
+        history.pushState({}, "", "/app");
+        configureRouter("/app");
+        render(
+          <div data-testid="container">
+            <Switch>
+              <Route path="/foo">A</Route>
+              <Route path="/bar">B</Route>
+              <Route path="*">C</Route>
+            </Switch>
+            <div>
+              <Route path="/bar">E</Route>
+            </div>
+          </div>
+        );
+
+        expectContent("C");
+        await waitFor(() => {
+          navigate("bar");
+        });
+        expectContent("BE");
+      });
     });
   });
 });

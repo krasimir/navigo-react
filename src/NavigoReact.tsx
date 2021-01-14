@@ -1,8 +1,8 @@
 import React, { useRef, useEffect, useState, useContext, useReducer } from "react";
-import Navigo, { Match, RouteHooks } from "navigo";
+import Navigo, { Match, RouteHooks, Route as NavigoRoute } from "navigo";
+// import Navigo, { Match, RouteHooks } from "../../navigo";
 
 import { RouteProps, Path, NotFoundRouteProps, NavigoSwitchContextType, NavigoRouting } from "../index.d";
-import { loadPartialConfig } from "@babel/core";
 
 let router: Navigo | undefined;
 let Context = React.createContext({ match: false } as NavigoRouting);
@@ -38,10 +38,6 @@ export function Route({ path, children, loose, before, after, already, leave }: 
     match: false,
   });
   const switchContext = useContext(SwitchContext);
-  const handler = useRef((match: false | Match) => {
-    setContext({ match });
-    nextTick(() => getRouter().updatePageLinks());
-  });
   const renderChild = () => <Context.Provider value={context}>{children}</Context.Provider>;
   const noneBlockingHook = (func: Function) => (match: Match) => {
     func((result: any) => {
@@ -61,26 +57,35 @@ export function Route({ path, children, loose, before, after, already, leave }: 
   };
 
   useEffect(() => {
+    let isMounted = true;
     const router = getRouter();
+    const handler = (match: false | Match) => {
+      if (isMounted) {
+        setContext({ match });
+      }
+      nextTick(() => getRouter().updatePageLinks());
+    };
     // creating the route
-    router.on(path, handler.current);
-    const navigoRoute = router.getRoute(handler.current);
+    router.on(path, handler);
+    const navigoRoute = router.getRoute(handler);
     // hooking
     if (before) {
-      router.addBeforeHook(navigoRoute, blockingHook(before));
+      router.addBeforeHook(navigoRoute as NavigoRoute, blockingHook(before));
     }
     if (after) {
-      router.addAfterHook(navigoRoute, noneBlockingHook(after));
+      router.addAfterHook(navigoRoute as NavigoRoute, noneBlockingHook(after));
     }
     if (already) {
-      router.addAlreadyHook(navigoRoute, noneBlockingHook(already));
+      router.addAlreadyHook(navigoRoute as NavigoRoute, noneBlockingHook(already));
     }
     if (leave) {
-      router.addLeaveHook(navigoRoute, blockingHook(leave));
+      router.addLeaveHook(navigoRoute as NavigoRoute, blockingHook(leave));
     }
     // adding the service leave hook
-    router.addLeaveHook(navigoRoute, (done: Function) => {
-      setContext({ match: false });
+    router.addLeaveHook(navigoRoute as NavigoRoute, (done: Function) => {
+      if (isMounted) {
+        setContext({ match: false });
+      }
       done();
     });
     // initial resolving
@@ -88,7 +93,8 @@ export function Route({ path, children, loose, before, after, already, leave }: 
     // initial data-navigo set up
     router.updatePageLinks();
     return () => {
-      router.off(handler.current);
+      isMounted = false;
+      router.off(handler);
     };
   }, []);
 

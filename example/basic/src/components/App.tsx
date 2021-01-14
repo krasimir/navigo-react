@@ -1,7 +1,7 @@
 import React from "react";
 import styled from "styled-components";
 
-import { Route } from "navigo-react";
+import { Route, Switch } from "navigo-react";
 import Navigation from "./Navigation";
 import About from "./About";
 import Products from "./Products";
@@ -21,16 +21,24 @@ export default function App() {
   return (
     <Container padding="1em">
       <Navigation />
-      <About />
-      <Team />
-      <Products />
+      <Switch>
+        <Route path="/about/team">
+          <Team />
+        </Route>
+        <Route path="/about">
+          <About />
+        </Route>
+        <Route path="/products/:type">
+          <Products />
+        </Route>
+        <Route path="*">
+          <hr />
+          Home
+        </Route>
+      </Switch>
       <Route path="/about/team">
         <hr />
         Team page footer
-      </Route>
-      <Route path="/">
-        <hr />
-        Home
       </Route>
     </Container>
   );
