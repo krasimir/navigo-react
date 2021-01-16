@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "lib/NavigoReact.min.js",
   "browser": "lib/NavigoReact.min.js",
-  "module": "lib/es/index.js",
+  "module": "lib/es/NavigoReact.js",
   "types": "./index.d.ts",
   "devDependencies": {
     "@babel/cli": "7.12.10",
@@ -41,7 +41,7 @@
   },
   "scripts": {
     "build": "yarn test && webpack --config ./webpack.config.js && yarn build-es",
-    "build-es": "babel src --no-babelrc --out-dir lib/es --extensions '.ts,.tsx' --ignore '**/*.spec.ts' --config-file ./.babelrc.es",
+    "build-es": "babel src --no-babelrc --out-dir lib/es --extensions '.ts,.tsx' --ignore '**/*.spec.tsx' --config-file ./.babelrc.es",
     "test": "./node_modules/.bin/jest ./src/__tests__/*.spec.tsx",
     "test-watch": "./node_modules/.bin/jest ./src/__tests__/*.spec.tsx --watch"
   }

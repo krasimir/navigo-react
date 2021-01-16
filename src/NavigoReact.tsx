@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useState, useContext, useReducer } from "react";
-import Navigo, { Match, RouteHooks, Route as NavigoRoute } from "navigo";
+import Navigo, { Match as NavigoMatch, RouteHooks as NavigoHooks, Route as NavigoRoute } from "navigo";
 // import Navigo, { Match, RouteHooks } from "../../navigo";
 
 import { RouteProps, Path, NotFoundRouteProps, NavigoSwitchContextType, NavigoRouting } from "../index.d";
@@ -7,6 +7,10 @@ import { RouteProps, Path, NotFoundRouteProps, NavigoSwitchContextType, NavigoRo
 let router: Navigo | undefined;
 let Context = React.createContext({ match: false } as NavigoRouting);
 let SwitchContext = React.createContext({ isInSwitch: false, switchMatch: false } as NavigoSwitchContextType);
+
+// types
+export type Match = NavigoMatch;
+export type RouteHooks = NavigoHooks;
 
 export function getRouter(root?: string): Navigo {
   if (router) {
