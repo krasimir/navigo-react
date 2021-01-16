@@ -2,5 +2,7 @@ example
 node_modules
 src
 .babelrc
-jest.setup.jesttsconfig.json
+.babelrc.es
+jest.setup.jest
+tsconfig.json
 webpack.config.js

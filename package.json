@@ -1,9 +1,12 @@
 {
   "name": "navigo-react",
-  "version": "0.5.0",
+  "version": "1.0.0",
   "main": "lib/NavigoReact.min.js",
+  "browser": "lib/NavigoReact.min.js",
+  "module": "lib/es/index.js",
   "types": "./index.d.ts",
   "devDependencies": {
+    "@babel/cli": "7.12.10",
     "@babel/core": "7.5.0",
     "@babel/plugin-transform-regenerator": "7.4.5",
     "@babel/plugin-transform-runtime": "7.5.0",
@@ -20,7 +23,6 @@
     "babel-jest": "26.6.3",
     "babel-loader": "8.0.4",
     "jest": "26.6.3",
-    "navigo": "8.6.3",
     "prettier": "1.19.1",
     "prop-types": "15.7.2",
     "react": "16.9.0",
@@ -34,8 +36,12 @@
     "webpack-cli": "3.1.2",
     "webpack-dev-server": "3.10.3"
   },
+  "dependencies": {
+    "navigo": "8.6.4"
+  },
   "scripts": {
-    "build": "yarn test && webpack --config ./webpack.config.js",
+    "build": "yarn test && webpack --config ./webpack.config.js && yarn build-es",
+    "build-es": "babel src --no-babelrc --out-dir lib/es --extensions '.ts,.tsx' --ignore '**/*.spec.ts' --config-file ./.babelrc.es",
     "test": "./node_modules/.bin/jest ./src/__tests__/*.spec.tsx",
     "test-watch": "./node_modules/.bin/jest ./src/__tests__/*.spec.tsx --watch"
   }
