@@ -1,5 +1,5 @@
 module.exports = {
-  mode: "development",
+  mode: "production",
   entry: [__dirname + "/src/NavigoReact.tsx"],
   devtool: "source-map",
   module: {
