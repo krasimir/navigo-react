@@ -16,6 +16,7 @@
   - [Other functions](#other-functions)
     - [configureRouter](#configurerouter)
     - [reset](#reset)
+  - [Hooking to the routing lifecycle](#hooking-to-the-routing-lifecycle)
   - [Examples](#examples)
     - [Basic example](#basic-example)
     - [URL parameters](#url-parameters)
@@ -63,15 +64,21 @@ Live demo here [https://codesandbox.io/s/navigo-react-example-w9l1d](https://cod
   path="/user/:id"
   loose="false"
   before={ (done) => {} }
-  after={ () => {} }
-  already={ () => {} }
+  after={ (done) => {} }
+  already={ (done) => {} }
   leave={ (done) => {} }>
+  <p>Hey</p>
+</Route>
 ```
 
 | Prop | type | required | Description |
 | ---- | ---- | -------- | ----------- |
 | **path** | string | yes | Specifies the path for which the children will be rendered. URL parameters are supported with the well known syntax `/users/:id/:action`. You can access the values via the [useNavigo](#usenavigo) hook |
 | loose | boolean | no | By default is `false` and if you provide `true` will always render its children. This is useful when you want to render stuff in case a specific route is NOT matching. Check out the [example below](#using-the-loos-property). |
+| before | function | no | It sets a function that is executed before the route gets switched. Checkout [Hooking to the routing lifecycle](#hooking-to-the-routing-lifecycle) section to see how to use it. |
+| after | function | no | It sets a function that is executed after the route gets switched. Checkout [Hooking to the routing lifecycle](#hooking-to-the-routing-lifecycle) section to see how to use it. |
+| already | function | no | It sets a function that is executed the current route is equal to the one specified. Or in other words - in case you land on the same route again. Checkout [Hooking to the routing lifecycle](#hooking-to-the-routing-lifecycle) section to see how to use it. |
+| leave | function | no | It sets a function that is executed when the user is about to leave the route. Checkout [Hooking to the routing lifecycle](#hooking-to-the-routing-lifecycle) section to see how to use it. |
 
 ### Switch
 
@@ -92,6 +99,8 @@ Live demo here [https://codesandbox.io/s/navigo-react-example-w9l1d](https://cod
 ### configureRouter
 
 ### reset
+
+## Hooking to the routing lifecycle
 
 ## Examples
 
