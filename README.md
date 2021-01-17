@@ -7,7 +7,6 @@
   - [Documentation](#documentation)
     - [Components](#components)
       - [Route](#route)
-  - [| Prop | type | required | Description |](#-prop--type--required--description-)
 
 ## Quick example
 
@@ -59,6 +58,6 @@ Live demo here [https://codesandbox.io/s/navigo-react-example-w9l1d](https://cod
 ```
 
 | Prop | type | required | Description |
------------------------------
+| ---- | ---- | -------- | ----------- |
 | path | string | no | |
 
