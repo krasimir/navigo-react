@@ -1,6 +1,6 @@
 {
   "name": "navigo-react",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "main": "lib/cjs/NavigoReact.js",
   "browser": "lib/NavigoReact.min.js",
   "module": "lib/es/NavigoReact.js",
@@ -41,9 +41,9 @@
   },
   "scripts": {
     "build": "yarn test && yarn transform",
-    "transform": "webpack --config ./webpack.config.js && yarn build-es && yarn build-common-js",
-    "build-common-js": "babel src --out-dir lib/cjs --extensions '.ts,.tsx' --ignore '**/*.spec.tsx'",
-    "build-es": "babel src --no-babelrc --out-dir lib/es --extensions '.ts,.tsx' --ignore '**/*.spec.tsx' --config-file ./.babelrc.es",
+    "transform": "webpack --config ./webpack.config.js && yarn build-es && yarn build-commonjs",
+    "build-commonjs": "babel src --out-dir lib/cjs --extensions '.ts,.tsx' --ignore '**/*.spec.tsx','src/__tests_helpers__/**/*.tsx' --source-maps",
+    "build-es": "babel src --no-babelrc --out-dir lib/es --extensions '.ts,.tsx' --ignore '**/*.spec.tsx','src/__tests_helpers__/**/*.tsx' --config-file ./.babelrc.es",
     "test": "./node_modules/.bin/jest ./src/__tests__/*.spec.tsx",
     "test-watch": "./node_modules/.bin/jest ./src/__tests__/*.spec.tsx --watch"
   }
