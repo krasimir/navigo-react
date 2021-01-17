@@ -6,6 +6,7 @@
   - [Quick example](#quick-example)
   - [Components](#components)
     - [Route](#route)
+      - [Route lifecycle functions](#route-lifecycle-functions)
     - [Switch](#switch)
     - [Base](#base)
     - [NotFound](#notfound)
@@ -84,6 +85,14 @@ The basic building block. Shortly, it's a component that renders its children ba
 | already | function | no | It sets a function that is executed the current route is equal to the one specified. Or in other words - in case you land on the same route again. Checkout [Hooking to the routing lifecycle](#hooking-to-the-routing-lifecycle) section to see how to use it. |
 | leave | function | no | It sets a function that is executed when the user is about to leave the route. Checkout [Hooking to the routing lifecycle](#hooking-to-the-routing-lifecycle) section to see how to use it. |
 
+#### Route lifecycle functions
+
+The `before`, `after`, `already` and `leave` are functions that execute during the route resolving. They give you the opportunity to hook some logic to each one of this moments and even pause/reject some of them. Each of this functions receive a callback. You fire the callback with an object, key-value pairs. Those pairs could be accessed via the `useNavigo` hook. For example:
+
+```jsx
+
+```
+
 ### Switch
 
 ```jsx
@@ -132,11 +141,36 @@ It indirectly calls the `navigate` method of the router. Checkout [redirecting](
 
 ### useNavigo
 
-`useNavigo` is a hook that gives you access to a [Match](https://github.com/krasimir/navigo/blob/master/DOCUMENTATION.md#match) object. If you are using it in a component that is somewhere below a `<Route>` component then `match` has a value. For example:
+`useNavigo` is a hook that gives you access to a [Match](https://github.com/krasimir/navigo/blob/master/DOCUMENTATION.md#match) object. You have to use it in a component that is somewhere below a `<Route>` component. Then `match` has a value and you can pull information for the matched route. For example:
 
 ```js
+import { Route, useNavigo } from "navigo-react";
 
+function User() {
+  const { match } = useNavigo();
+
+  return (
+    <p>
+      {match.params.action} user with id {match.data.id}
+    </p>
+  );
+}
+
+export default function App() {
+  return (
+    <>
+      <a href="/user/xxx?action=save" data-navigo>
+        Click me
+      </a>
+      <Route path="/user/:id">
+        <User />
+      </Route>
+    </>
+  );
+}
 ```
+
+`useNavigo` has one other function. It gives you access to the props that you send via the router lifecycle functions.
 
 ### useLocation
 
