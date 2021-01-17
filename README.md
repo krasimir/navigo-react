@@ -4,9 +4,18 @@
 
 - [navigo-react](#navigo-react)
   - [Quick example](#quick-example)
-  - [Documentation](#documentation)
-    - [Components](#components)
-      - [Route](#route)
+  - [Components](#components)
+    - [Route](#route)
+    - [Switch](#switch)
+    - [Base](#base)
+    - [NotFound](#notfound)
+    - [Redirect](#redirect)
+  - [Hooks](#hooks)
+    - [useNavigo](#usenavigo)
+    - [useLocation](#uselocation)
+  - [Other functions](#other-functions)
+    - [configureRouter](#configurerouter)
+    - [reset](#reset)
 
 ## Quick example
 
@@ -41,11 +50,9 @@ export default function App() {
 
 Live demo here [https://codesandbox.io/s/navigo-react-example-w9l1d](https://codesandbox.io/s/navigo-react-example-w9l1d).
 
-## Documentation
+## Components
 
-### Components
-
-#### Route
+### Route
 
 ```
 <Route
@@ -59,5 +66,25 @@ Live demo here [https://codesandbox.io/s/navigo-react-example-w9l1d](https://cod
 
 | Prop | type | required | Description |
 | ---- | ---- | -------- | ----------- |
-| path | string | no | |
+| path | string | yes | Specifies the path for which the children will be rendered. URL parameters are supported with the well known syntax. Like for example `/users/:id/:action`. You can access the values via the [useNavigo](#usenavigo) hook |
+
+### Switch
+
+### Base
+
+### NotFound
+
+### Redirect
+
+## Hooks
+
+### useNavigo
+
+### useLocation
+
+## Other functions
+
+### configureRouter
+
+### reset
 
