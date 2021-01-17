@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useState, useContext, useReducer } from "react";
 import Navigo, { Match as NavigoMatch, RouteHooks as NavigoHooks, Route as NavigoRoute } from "navigo";
-// import Navigo, { Match, RouteHooks } from "../../navigo";
+// import Navigo, { Match as NavigoMatch, RouteHooks as NavigoHooks, Route as NavigoRoute } from "../../navigo";
 
 import { RouteProps, Path, NotFoundRouteProps, NavigoSwitchContextType, NavigoRouting } from "../index.d";
 
@@ -16,7 +16,8 @@ export function getRouter(root?: string): Navigo {
   if (router) {
     return router;
   }
-  router = new Navigo(root || "/", { strategy: "ALL", noMatchWarning: true });
+  // @ts-ignore
+  router = window.R = new Navigo(root || "/", { strategy: "ALL", noMatchWarning: true });
   // @ts-ignore
   window.router = router;
   return router;

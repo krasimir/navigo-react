@@ -17,7 +17,6 @@
   - [Other functions](#other-functions)
     - [configureRouter](#configurerouter)
     - [reset](#reset)
-  - [Hooking to the routing lifecycle](#hooking-to-the-routing-lifecycle)
   - [Examples](#examples)
     - [Basic example](#basic-example)
     - [Accessing URL and GET parameters](#accessing-url-and-get-parameters)
@@ -25,6 +24,7 @@
     - [Redirecting](#redirecting)
     - [Get data required by a Route](#get-data-required-by-a-route)
     - [Block opening a route](#block-opening-a-route)
+    - [Handling transitions](#handling-transitions)
 
 ## Quick example
 
@@ -217,17 +217,32 @@ export default function App() {
 }
 ```
 
-`useNavigo` has one other function. It gives you access to the props that you send via the router lifecycle functions.
+`useNavigo` has one other function. It gives you access to the props that you send via the router [lifecycle functions](#route-lifecycle-functions). Here are a two examples that demonstrate the idea:
+
+* [Get data required by a Route](#get-data-required-by-a-route)
+* [Block opening a route](#block-opening-a-route)
 
 ### useLocation
+
+`useLocation` gives you a [Match](https://github.com/krasimir/navigo/blob/master/DOCUMENTATION.md#match) object that represents the current URL of the browser.
+
+```js
+const match = useLocation();
+```
 
 ## Other functions
 
 ### configureRouter
 
+`configureRouter` could be used outside React and its purpose is to set the base root path of the router. Same as [`<Base>`](#base) component.
+
+```js
+configureRouter('/my/app');
+```
+
 ### reset
 
-## Hooking to the routing lifecycle
+Calling this function means flushing all the registered routes.
 
 ## Examples
 
@@ -360,13 +375,7 @@ function User() {
 
 export default function App() {
   const [authorized, loggedIn] = useState(false);
-  const before = (cb) => {
-    if (!authorized) {
-      cb(false);
-    } else {
-      cb(true);
-    }
-  };
+  const before = (cb) => cb(authorized);
 
   return (
     <>
@@ -385,3 +394,9 @@ export default function App() {
 ```
 
 https://codesandbox.io/s/navigo-block-routing-e2qvw
+
+### Handling transitions
+
+```jsx
+
+```

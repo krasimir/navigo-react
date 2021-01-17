@@ -16,7 +16,7 @@ export const Container = styled.div<ContainerProps>`
   margin: ${(props) => ("margin" in props ? props.margin : 0)};
 `;
 const leaveHook = (path: string) => async (done: Function) => {
-  console.log(`Leave hook for ${path}`);
+  // console.log(`Leave hook for ${path}`);
   done({ leaving: true });
   await delay(900);
   done(true);
