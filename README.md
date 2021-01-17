@@ -19,6 +19,7 @@
   - [Hooking to the routing lifecycle](#hooking-to-the-routing-lifecycle)
   - [Examples](#examples)
     - [Basic example](#basic-example)
+    - [Accessing URL and GET parameters](#accessing-url-and-get-parameters)
     - [URL parameters](#url-parameters)
     - [Using the `loos` property](#using-the-loos-property)
     - [Redirecting](#redirecting)
@@ -131,6 +132,12 @@ It indirectly calls the `navigate` method of the router. Checkout [redirecting](
 
 ### useNavigo
 
+`useNavigo` is a hook that gives you access to a [Match](https://github.com/krasimir/navigo/blob/master/DOCUMENTATION.md#match) object. If you are using it in a component that is somewhere below a `<Route>` component then `match` has a value. For example:
+
+```js
+
+```
+
 ### useLocation
 
 ## Other functions
@@ -174,7 +181,38 @@ export default function App() {
 }
 ```
 
-[https://codesandbox.io/s/navigo-react-example-w9l1d](https://codesandbox.io/s/navigo-react-example-w9l1d).
+https://codesandbox.io/s/navigo-react-example-w9l1d
+
+### Accessing URL and GET parameters
+
+```jsx
+import { Route, useNavigo } from "navigo-react";
+
+function User() {
+  const { match } = useNavigo();
+
+  return (
+    <p>
+      {match.params.action} user with id {match.data.id}
+    </p>
+  );
+}
+
+export default function App() {
+  return (
+    <>
+      <a href="/user/xxx?action=save" data-navigo>
+        Click me
+      </a>
+      <Route path="/user/:id">
+        <User />
+      </Route>
+    </>
+  );
+}
+```
+
+https://codesandbox.io/s/navigo-url-and-get-parameters-5few6
 
 ### URL parameters
 
