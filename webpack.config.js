@@ -23,8 +23,23 @@ module.exports = {
     path: `${__dirname}/lib`,
     publicPath: "/",
     filename: "NavigoReact.min.js",
+    library: "NavigoReact",
+    libraryTarget: "umd",
+    libraryExport: "default",
+    umdNamedDefine: true,
   },
   externals: {
-    react: "react",
+    react: {
+      commonjs: "react",
+      commonjs2: "react",
+      amd: "React",
+      root: "React",
+    },
+    "react-dom": {
+      commonjs: "react-dom",
+      commonjs2: "react-dom",
+      amd: "ReactDOM",
+      root: "ReactDOM",
+    },
   },
 };

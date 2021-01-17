@@ -1,5 +1,5 @@
 # navigo-react
 
-[Navigo](https://github.com/krasimir/navigo) for React.
+[Navigo](https://github.com/krasimir/navigo) router for React.
 
-!WIP
+Quick example:
