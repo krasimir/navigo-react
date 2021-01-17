@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import React from "react";
 import styled, { keyframes } from "styled-components";
-import { useNavigo, getRouter } from "navigo-react";
+import { useNavigo } from "navigo-react";
 
 type CardContainerTypes = {
   leaving?: boolean;
@@ -39,7 +39,7 @@ const Paragraph = styled.p`
 `;
 
 export default function Card({ children, bgColor }: { children: any; bgColor?: string }) {
-  const { leaving, match } = useNavigo();
+  const { leaving } = useNavigo();
 
   return (
     <CardContainer leaving={leaving} bgColor={bgColor}>

@@ -3,6 +3,6 @@ node_modules
 src
 .babelrc
 .babelrc.es
-jest.setup.jest
+jest.setup.js
 tsconfig.json
 webpack.config.js

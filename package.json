@@ -1,7 +1,7 @@
 {
   "name": "navigo-react",
-  "version": "1.0.1",
-  "main": "lib/NavigoReact.min.js",
+  "version": "1.0.2",
+  "main": "lib/cjs/NavigoReact.js",
   "browser": "lib/NavigoReact.min.js",
   "module": "lib/es/NavigoReact.js",
   "types": "./index.d.ts",
@@ -40,7 +40,9 @@
     "navigo": "8.6.4"
   },
   "scripts": {
-    "build": "yarn test && webpack --config ./webpack.config.js && yarn build-es",
+    "build": "yarn test && yarn transform",
+    "transform": "webpack --config ./webpack.config.js && yarn build-es && yarn build-common-js",
+    "build-common-js": "babel src --out-dir lib/cjs --extensions '.ts,.tsx' --ignore '**/*.spec.tsx'",
     "build-es": "babel src --no-babelrc --out-dir lib/es --extensions '.ts,.tsx' --ignore '**/*.spec.tsx' --config-file ./.babelrc.es",
     "test": "./node_modules/.bin/jest ./src/__tests__/*.spec.tsx",
     "test-watch": "./node_modules/.bin/jest ./src/__tests__/*.spec.tsx --watch"

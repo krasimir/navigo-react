@@ -1,7 +1,6 @@
 import React from "react";
 import styled from "styled-components";
-// import { Route, Switch, getRouter } from "navigo-react";
-import { Route, Switch, getRouter } from "../../../../src/NavigoReact";
+import { Route, Switch } from "navigo-react";
 
 import Card from "./Card";
 
