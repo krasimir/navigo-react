@@ -105,11 +105,27 @@ It specifies the root of your application. If you deploy you code at specific pa
 
 | Prop | type | required | Description |
 | ---- | ---- | -------- | ----------- |
-| **path** | string | yes | The root of your application |
+| **path** | string | yes | The root of your application. |
 
 ### NotFound
 
+```jsx
+<NotFound>I'm 404 page.</NotFound>
+```
+
+It renders its content in case of a no match is found.
+
 ### Redirect
+
+```jsx
+<Redirect path="/a/new/place" />
+```
+
+It indirectly calls the `navigate` method of the router. Checkout [redirecting](#redirecting) example below.
+
+| Prop | type | required | Description |
+| ---- | ---- | -------- | ----------- |
+| **path** | string | yes | The path where you want to go to. |
 
 ## Hooks
 
