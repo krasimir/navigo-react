@@ -21,6 +21,7 @@
     - [Basic example](#basic-example)
     - [URL parameters](#url-parameters)
     - [Using the `loos` property](#using-the-loos-property)
+    - [Redirecting](#redirecting)
 
 ## Quick example
 
@@ -59,7 +60,7 @@ Live demo here [https://codesandbox.io/s/navigo-react-example-w9l1d](https://cod
 
 ### Route
 
-```
+```jsx
 <Route
   path="/user/:id"
   loose="false"
@@ -70,6 +71,8 @@ Live demo here [https://codesandbox.io/s/navigo-react-example-w9l1d](https://cod
   <p>Hey</p>
 </Route>
 ```
+
+The basic building block. Shortly, it's a component that renders its children based on the `path` prop.
 
 | Prop | type | required | Description |
 | ---- | ---- | -------- | ----------- |
@@ -82,7 +85,27 @@ Live demo here [https://codesandbox.io/s/navigo-react-example-w9l1d](https://cod
 
 ### Switch
 
+```jsx
+<Switch>
+  <Route path="/about">About</Route>
+  <Route path="/products">Products</Route>
+  <Route path="*">Home</Route>
+</Switch>
+```
+
+It forces the router to pick only one of the routes. Without this component multiple matches are possible. Like in the example above, if there is no `<Switch>` the `"Home"` string will be rendered no mather what because `*` matches every route.
+
 ### Base
+
+```jsx
+<Base path="/my/app" />
+```
+
+It specifies the root of your application. If you deploy you code at specific path you have to either use this component or [`configureRouter`](#configurerouter) to tell Navigo where to start from.
+
+| Prop | type | required | Description |
+| ---- | ---- | -------- | ----------- |
+| **path** | string | yes | The root of your application |
 
 ### NotFound
 
@@ -140,4 +163,6 @@ export default function App() {
 ### URL parameters
 
 ### Using the `loos` property
+
+### Redirecting
 
