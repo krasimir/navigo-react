@@ -7,7 +7,7 @@
   - [Documentation](#documentation)
     - [Components](#components)
       - [Route](#route)
-  - [| Prop | type | required | Description](#-prop--type--required--description)
+  - [| Prop | type | required | Description |](#-prop--type--required--description-)
 
 ## Quick example
 
@@ -58,7 +58,7 @@ Live demo here [https://codesandbox.io/s/navigo-react-example-w9l1d](https://cod
   leave={ (done) => {} }>
 ```
 
-| Prop | type | required | Description
+| Prop | type | required | Description |
 -----------------------------
-| path | string | no
+| path | string | no | |
 
