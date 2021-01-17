@@ -27,6 +27,7 @@ module.exports = {
     libraryTarget: "umd",
     libraryExport: "default",
     umdNamedDefine: true,
+    globalObject: "typeof self !== 'undefined' ? self : this",
   },
   externals: {
     react: {

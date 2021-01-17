@@ -190,3 +190,18 @@ function useNotFound(hooks?: RouteHooks | undefined): false | Match {
 
   return match;
 }
+
+const API = {
+  getRouter,
+  configureRouter,
+  reset,
+  Route,
+  Base,
+  Switch,
+  NotFound,
+  Redirect,
+  useNavigo,
+  useLocation,
+};
+
+export default API;
