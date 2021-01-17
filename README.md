@@ -398,5 +398,54 @@ https://codesandbox.io/s/navigo-block-routing-e2qvw
 ### Handling transitions
 
 ```jsx
+import { Route, Switch, useNavigo } from "navigo-react";
 
+const delay = (time) => new Promise((done) => setTimeout(done, time));
+
+function Card({ children, bgColor }) {
+  const { leaving } = useNavigo();
+  const animation = `${
+    leaving ? "out" : "in"
+  } 1000ms cubic-bezier(1, -0.28, 0.28, 1.49)`;
+
+  return (
+    <div
+      className={`card ${leaving ? "leaving" : ""}`}
+      style={{ backgroundColor: bgColor, animation }}
+    >
+      <p>{children}</p>
+    </div>
+  );
+}
+
+const leaveHook = async (done) => {
+  done({ leaving: true });
+  await delay(900);
+  done(true);
+};
+
+export default function App() {
+  return (
+    <>
+      <Switch>
+        <Route path="/card-two" leave={leaveHook}>
+          <Card bgColor="#254c6a">
+            Card #2.
+            <a href="/" data-navigo>Click here</a>
+            to go back
+          </Card>
+        </Route>
+        <Route path="/" leave={leaveHook}>
+          <Card bgColor="#1f431f">
+            Welcome to the transition example.
+            <a href="/card-two" data-navigo>Click here</a>{" "}
+            to open the other card.
+          </Card>
+        </Route>
+      </Switch>
+    </>
+  );
+}
 ```
+
+https://codesandbox.io/s/navigo-handling-transitions-ipprc
