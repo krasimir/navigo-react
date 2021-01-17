@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { Match } from "navigo/index.d";
 import "@testing-library/jest-dom/extend-expect";
 import { render, waitFor, fireEvent, screen } from "@testing-library/react";
 import { getRouter, reset, Route, useNavigo, Base, configureRouter } from "../NavigoReact";
@@ -315,6 +314,187 @@ describe("Given navigo-react", () => {
       getRouter().navigate("/about");
       expectContent("Nope");
       expect(location.pathname).toEqual("/");
+    });
+    it("should accumulate state", async () => {
+      history.pushState({}, "", "/about");
+      const spy = jest.fn();
+      function Comp() {
+        spy(useNavigo());
+
+        return <p>Hey</p>;
+      }
+
+      render(
+        <div data-testid="container">
+          <Route
+            path="/about"
+            loose
+            before={async (done: Function) => {
+              done({ a: "b" });
+              await delay(2);
+              waitFor(() => {
+                done({ c: "d" });
+              });
+              await delay(2);
+              waitFor(() => {
+                done(true);
+              });
+            }}
+          >
+            <Comp />
+          </Route>
+        </div>
+      );
+
+      await delay(20);
+      expect(spy).toBeCalledTimes(4);
+      expect(spy.mock.calls[0][0]).toStrictEqual({ match: false });
+      expect(spy.mock.calls[1][0]).toStrictEqual({ match: false, a: "b" });
+      expect(spy.mock.calls[2][0]).toStrictEqual({ match: false, a: "b", c: "d" });
+      expect(spy.mock.calls[3][0]).toStrictEqual({ match: expect.objectContaining({ url: "about" }), a: "b", c: "d" });
+    });
+    it("should keep the scope of the before hook and give access to the latest state values", () => {
+      history.pushState({}, "", "/");
+      const spy = jest.fn();
+      function Comp() {
+        const [count, setCount] = useState(0);
+        const before = (cb: Function) => {
+          spy(count);
+          cb(true);
+        };
+
+        return (
+          <>
+            <a href="/about" data-navigo>
+              about
+            </a>
+            <Route path="/about" loose before={before}>
+              <button onClick={() => setCount(count + 1)} data-testid="c">
+                click me {count}
+              </button>
+            </Route>
+          </>
+        );
+      }
+      const { getByTestId, getByText } = render(
+        <div data-testid="container">
+          <Comp />
+        </div>
+      );
+
+      fireEvent.click(getByTestId("c"));
+      fireEvent.click(getByTestId("c"));
+      fireEvent.click(getByTestId("c"));
+      expectContent("aboutclick me 3");
+      fireEvent.click(getByText("about"));
+      expect(spy).toBeCalledTimes(1);
+      expect(spy).toBeCalledWith(3);
+    });
+    it("should keep the scope of the after hook and give access to the latest state values", () => {
+      history.pushState({}, "", "/");
+      const spy = jest.fn();
+      function Comp() {
+        const [count, setCount] = useState(0);
+        const after = (cb: Function) => {
+          spy(count);
+        };
+
+        return (
+          <>
+            <a href="/about" data-navigo>
+              about
+            </a>
+            <Route path="/about" loose after={after}>
+              <button onClick={() => setCount(count + 1)} data-testid="c">
+                click me {count}
+              </button>
+            </Route>
+          </>
+        );
+      }
+      const { getByTestId, getByText } = render(
+        <div data-testid="container">
+          <Comp />
+        </div>
+      );
+
+      fireEvent.click(getByTestId("c"));
+      fireEvent.click(getByTestId("c"));
+      fireEvent.click(getByTestId("c"));
+      expectContent("aboutclick me 3");
+      fireEvent.click(getByText("about"));
+      expect(spy).toBeCalledTimes(1);
+      expect(spy).toBeCalledWith(3);
+    });
+    it("should keep the scope of the already hook and give access to the latest state values", () => {
+      history.pushState({}, "", "/");
+      const spy = jest.fn();
+      function Comp() {
+        const [count, setCount] = useState(0);
+        const already = (cb: Function) => {
+          spy(count);
+        };
+
+        return (
+          <>
+            <a href="/about" data-navigo>
+              about
+            </a>
+            <Route path="/about" loose already={already}>
+              <button onClick={() => setCount(count + 1)} data-testid="c">
+                click me {count}
+              </button>
+            </Route>
+          </>
+        );
+      }
+      const { getByTestId, getByText } = render(
+        <div data-testid="container">
+          <Comp />
+        </div>
+      );
+
+      fireEvent.click(getByTestId("c"));
+      fireEvent.click(getByTestId("c"));
+      fireEvent.click(getByTestId("c"));
+      expectContent("aboutclick me 3");
+      fireEvent.click(getByText("about"));
+      fireEvent.click(getByText("about"));
+      expect(spy).toBeCalledTimes(1);
+      expect(spy).toBeCalledWith(3);
+    });
+    it("should keep the scope of the leave hook and give access to the latest state values", () => {
+      history.pushState({}, "", "/about");
+      const spy = jest.fn();
+      function Comp() {
+        const [count, setCount] = useState(0);
+        const leave = (cb: Function) => {
+          spy(count);
+        };
+
+        return (
+          <>
+            <Route path="/about" loose leave={leave}>
+              <button onClick={() => setCount(count + 1)} data-testid="c">
+                click me {count}
+              </button>
+            </Route>
+          </>
+        );
+      }
+      const { getByTestId } = render(
+        <div data-testid="container">
+          <Comp />
+        </div>
+      );
+
+      fireEvent.click(getByTestId("c"));
+      fireEvent.click(getByTestId("c"));
+      fireEvent.click(getByTestId("c"));
+      expectContent("click me 3");
+      getRouter().navigate("/nope");
+      expect(spy).toBeCalledTimes(1);
+      expect(spy).toBeCalledWith(3);
     });
   });
   describe("when passing `after`", () => {

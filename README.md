@@ -21,9 +21,10 @@
   - [Examples](#examples)
     - [Basic example](#basic-example)
     - [Accessing URL and GET parameters](#accessing-url-and-get-parameters)
-    - [URL parameters](#url-parameters)
-    - [Using the `loos` property](#using-the-loos-property)
+    - [Using the `loose` property](#using-the-loose-property)
     - [Redirecting](#redirecting)
+    - [Get data required by a Route](#get-data-required-by-a-route)
+    - [Block opening a route](#block-opening-a-route)
 
 ## Quick example
 
@@ -66,10 +67,10 @@ Live demo here [https://codesandbox.io/s/navigo-react-example-w9l1d](https://cod
 <Route
   path="/user/:id"
   loose="false"
-  before={ (done) => {} }
-  after={ (done) => {} }
-  already={ (done) => {} }
-  leave={ (done) => {} }>
+  before={ (cb) => {} }
+  after={ (cb) => {} }
+  already={ (cb) => {} }
+  leave={ (cb) => {} }>
   <p>Hey</p>
 </Route>
 ```
@@ -90,8 +91,32 @@ The basic building block. Shortly, it's a component that renders its children ba
 The `before`, `after`, `already` and `leave` are functions that execute during the route resolving. They give you the opportunity to hook some logic to each one of this moments and even pause/reject some of them. Each of this functions receive a callback. You fire the callback with an object, key-value pairs. Those pairs could be accessed via the `useNavigo` hook. For example:
 
 ```jsx
+function Print() {
+  const { fact, loading } = useNavigo();
 
+  if (loading) return <p>Loading ...</p>;
+  if (fact) return <p>{fact}</p>;
+  return null;
+}
+
+// Somewhere above
+<Route
+  path="/cats"
+  loose
+  before={async (cb) => {
+    cb({ loading: true });
+    const res = await (await fetch("https://catfact.ninja/fact")).json();
+    cb({ fact: res.fact, loading: false });
+    cb(true);
+  }}
+>
+  <Print />
+</Route>
 ```
+
+Every `cb` call is basically re-rendering the `<Print>` component and `useNavigo` hook returns whatever we passed as argument. At the end when we are ready we call `cb` with `true` which indicates to the router to move forward. Full example [here](#get-data-required-by-a-route).
+
+We may block the routing to specific routes if we call `cb` with false. For example:
 
 ### Switch
 
@@ -248,9 +273,52 @@ export default function App() {
 
 https://codesandbox.io/s/navigo-url-and-get-parameters-5few6
 
-### URL parameters
-
-### Using the `loos` property
+### Using the `loose` property
 
 ### Redirecting
 
+### Get data required by a Route
+
+```jsx
+import { Route, useNavigo } from "navigo-react";
+
+function Print() {
+  const { fact, loading } = useNavigo();
+
+  if (loading) {
+    return <p>Loading ...</p>;
+  }
+  if (fact) {
+    return <p>{fact}</p>;
+  }
+  return null;
+}
+
+export default function App() {
+  return (
+    <>
+      <nav>
+        <a href="/cats" data-navigo>
+          Get a cat fact
+        </a>
+      </nav>
+      <Route
+        path="/cats"
+        loose
+        before={async (cb) => {
+          cb({ loading: true });
+          const res = await (await fetch("https://catfact.ninja/fact")).json();
+          cb({ fact: res.fact, loading: false });
+          cb(true);
+        }}
+      >
+        <Print />
+      </Route>
+    </>
+  );
+}
+```
+
+https://codesandbox.io/s/navigo-before-lifecycle-function-hgeld
+
+### Block opening a route

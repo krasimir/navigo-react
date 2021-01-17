@@ -38,6 +38,7 @@ export function reset() {
 
 // components
 export function Route({ path, children, loose, before, after, already, leave }: RouteProps) {
+  const route = useRef<NavigoRoute | undefined>(undefined);
   const [context, setContext] = useReducer((state: NavigoRouting, action: NavigoRouting) => ({ ...state, ...action }), {
     match: false,
   });
@@ -51,6 +52,7 @@ export function Route({ path, children, loose, before, after, already, leave }: 
     }, match);
   };
   const blockingHook = (func: Function) => (done: Function, match: Match) => {
+    // @ts-ignore
     func((result: any) => {
       if (typeof result === "boolean") {
         done(result);
@@ -71,7 +73,7 @@ export function Route({ path, children, loose, before, after, already, leave }: 
     };
     // creating the route
     router.on(path, handler);
-    const navigoRoute = router.getRoute(handler);
+    const navigoRoute = (route.current = router.getRoute(handler));
     // hooking
     if (before) {
       router.addBeforeHook(navigoRoute as NavigoRoute, blockingHook(before));
@@ -101,6 +103,27 @@ export function Route({ path, children, loose, before, after, already, leave }: 
       router.off(handler);
     };
   }, []);
+
+  // make sure that the lifecycle funcs have access to the latest local state values
+  useEffect(() => {
+    if (before && route.current && route.current.hooks.before && route.current.hooks.before[0]) {
+      // @ts-ignore
+      route.current.hooks.before[0] = blockingHook(before);
+    }
+    if (after && route.current && route.current.hooks.after && route.current.hooks.after[0]) {
+      // @ts-ignore
+      route.current.hooks.after[0] = noneBlockingHook(after);
+    }
+    if (already && route.current && route.current.hooks.already && route.current.hooks.already[0]) {
+      // @ts-ignore
+      route.current.hooks.already[0] = noneBlockingHook(already);
+    }
+    // @ts-ignore
+    if (leave && route.current && route.current.hooks.leave.length === 2) {
+      // @ts-ignore
+      route.current.hooks.leave[0] = blockingHook(leave);
+    }
+  }, [before, after, already, leave]);
 
   if (loose) {
     return renderChild();
