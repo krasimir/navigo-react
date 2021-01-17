@@ -114,9 +114,31 @@ function Print() {
 </Route>
 ```
 
-Every `cb` call is basically re-rendering the `<Print>` component and `useNavigo` hook returns whatever we passed as argument. At the end when we are ready we call `cb` with `true` which indicates to the router to move forward. Full example [here](#get-data-required-by-a-route).
+Every `cb` call is basically re-rendering the `<Print>` component and `useNavigo` hook returns whatever we passed as argument. At the end when we are ready we call `cb` with `true` which indicates to the router that our job is done. Full example [here](#get-data-required-by-a-route).
 
-We may block the routing to specific routes if we call `cb` with false. For example:
+We may block the routing to specific paths if we call `cb` with `false`. For example:
+
+```jsx
+export default function App() {
+  const [authorized, loggedIn] = useState(false);
+  const before = (cb) => {
+    if (!authorized) {
+      cb(false);
+    } else {
+      cb(true);
+    }
+  };
+
+  return (
+    <>
+      <Route path="/user" before={before}>
+        <User />
+      </Route>
+    </>
+  );
+}
+```
+(Full example [here](#block-opening-a-route))
 
 ### Switch
 
@@ -322,3 +344,44 @@ export default function App() {
 https://codesandbox.io/s/navigo-before-lifecycle-function-hgeld
 
 ### Block opening a route
+
+The user can't go to `/user` route before the `authorized` becomes `true`.
+
+```jsx
+import { Route, useNavigo } from "navigo-react";
+
+function User() {
+  const { match } = useNavigo();
+  if (match) {
+    return <p>I'm a user</p>;
+  }
+  return null;
+}
+
+export default function App() {
+  const [authorized, loggedIn] = useState(false);
+  const before = (cb) => {
+    if (!authorized) {
+      cb(false);
+    } else {
+      cb(true);
+    }
+  };
+
+  return (
+    <>
+      <nav>
+        <a href="/user" data-navigo>
+          Access user
+        </a>
+        {!authorized && <button onClick={() => loggedIn(true)}>Sign in</button>}
+      </nav>
+      <Route path="/user" loose before={before}>
+        <User />
+      </Route>
+    </>
+  );
+}
+```
+
+https://codesandbox.io/s/navigo-block-routing-e2qvw
