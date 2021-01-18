@@ -1,10 +1,26 @@
 {
   "name": "navigo-react",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "main": "lib/cjs/NavigoReact.js",
   "browser": "lib/NavigoReact.min.js",
   "module": "lib/es/NavigoReact.js",
   "types": "./index.d.ts",
+  "author": {
+    "name": "Krasimir Tsonev",
+    "email": "me@krasimir.dev",
+    "url": "http://krasimirtsonev.com/blog"
+  },
+  "license": "MIT",
+  "keywords": [
+    "router",
+    "react",
+    "navigo",
+    "history"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:krasimir/navigo-react.git"
+  },
   "devDependencies": {
     "@babel/cli": "7.12.10",
     "@babel/core": "7.5.0",
