@@ -4,6 +4,7 @@ import { render, waitFor, fireEvent, screen } from "@testing-library/react";
 import { getRouter, reset, Route, useNavigo, Base, configureRouter } from "../NavigoReact";
 
 import { expectContent, navigate, delay } from "../__tests_helpers__/utils";
+import { Switch } from "../..";
 
 let warn: jest.SpyInstance;
 
@@ -648,6 +649,32 @@ describe("Given navigo-react", () => {
       });
       expectContent("Match");
       expect(location.pathname).toEqual("/about");
+    });
+  });
+  describe("when passing a name", () => {
+    it("should be possible to navigate to that same route later", async () => {
+      history.pushState({}, "", "/");
+      function Users() {
+        const { match } = useNavigo();
+        // @ts-ignore
+        return <p>Hello, {match.data.name}</p>;
+      }
+
+      render(
+        <div data-testid="container">
+          <Switch>
+            <Route path="/users/:name" name="user">
+              <Users />
+            </Route>
+          </Switch>
+        </div>
+      );
+
+      expectContent("");
+      await waitFor(() => {
+        getRouter().navigateByName("user", { name: "krasimir" });
+      });
+      expectContent("Hello, krasimir");
     });
   });
 });

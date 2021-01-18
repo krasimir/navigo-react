@@ -38,7 +38,7 @@ export function reset() {
 }
 
 // components
-export function Route({ path, children, loose, before, after, already, leave }: RouteProps) {
+export function Route({ path, children, loose, before, after, already, leave, name }: RouteProps) {
   const route = useRef<NavigoRoute | undefined>(undefined);
   const [context, setContext] = useReducer((state: NavigoRouting, action: NavigoRouting) => ({ ...state, ...action }), {
     match: false,
@@ -75,6 +75,9 @@ export function Route({ path, children, loose, before, after, already, leave }: 
     // creating the route
     router.on(path, handler);
     const navigoRoute = (route.current = router.getRoute(handler));
+    if (navigoRoute && name) {
+      navigoRoute.name = name;
+    }
     // hooking
     if (before) {
       router.addBeforeHook(navigoRoute as NavigoRoute, blockingHook(before));

@@ -3,6 +3,7 @@ import Navigo, { Match, RouteHooks } from "navigo";
 export type RouteProps = {
   path: string;
   children: any;
+  name?: string;
   loose?: boolean;
   before?: Function;
   after?: Function;

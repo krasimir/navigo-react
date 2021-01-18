@@ -4,6 +4,7 @@
 
 - [navigo-react](#navigo-react)
   - [Quick example](#quick-example)
+  - [Navigating between routes](#navigating-between-routes)
   - [Components](#components)
     - [Route](#route)
       - [Route lifecycle functions](#route-lifecycle-functions)
@@ -17,6 +18,7 @@
   - [Other functions](#other-functions)
     - [configureRouter](#configurerouter)
     - [reset](#reset)
+    - [getRouter](#getrouter)
   - [Examples](#examples)
     - [Basic example](#basic-example)
     - [Accessing URL and GET parameters](#accessing-url-and-get-parameters)
@@ -59,6 +61,34 @@ export default function App() {
 
 Live demo here [https://codesandbox.io/s/navigo-react-example-w9l1d](https://codesandbox.io/s/navigo-react-example-w9l1d).
 
+## Navigating between routes
+
+The navigation in Navigo happens in two ways:
+
+* Via `<a>` tags. The only requirement is to add `data-navigo` attribute to the link. For example `<a href="/users/list" data-navigo>View users</a>`. For more details on the exact API check out [this page](https://github.com/krasimir/navigo/blob/master/DOCUMENTATION.md#augment-your-a-tags).
+* Via the `navigate` or `navigateByName` methods. First you have to access the router with `getRouter()` and then use one of those two methods. For example:
+```js
+import { getRouter } from 'navigo-react';
+
+// Somewhere in your React components
+<button onClick={() => getRouter().navigate('/users/list')}>
+  View users
+</button>
+
+// or if you have a named route like
+<Route path="/users/:id/:action" name="user">
+  ...
+</Route>
+
+// Somewhere in your React components
+<button
+  onClick={
+    () => getRouter().navigateByName('name', { id: 'xxx', action: 'view' })
+  }>
+  View users
+</button>
+```
+
 ## Components
 
 ### Route
@@ -67,6 +97,7 @@ Live demo here [https://codesandbox.io/s/navigo-react-example-w9l1d](https://cod
 <Route
   path="/user/:id"
   loose="false"
+  name="my-route-name"
   before={ (cb) => {} }
   after={ (cb) => {} }
   already={ (cb) => {} }
@@ -81,6 +112,7 @@ The basic building block. Shortly, it's a component that renders its children ba
 | ---- | ---- | -------- | ----------- |
 | **path** | string | yes | Specifies the path for which the children will be rendered. URL parameters are supported with the well known syntax `/users/:id/:action`. You can access the values via the [useNavigo](#usenavigo) hook |
 | loose | boolean | no | By default is `false` and if you provide `true` will always render its children. This is useful when you want to render stuff in case a specific route is NOT matching. Check out the [example below](#using-the-loos-property). |
+| name | string | no | Sets a name of the route so we can later navigate to it easily. Check out [this section]() for an example |
 | before | function | no | It sets a function that is executed before the route gets switched. Checkout [Hooking to the routing lifecycle](#hooking-to-the-routing-lifecycle) section to see how to use it. |
 | after | function | no | It sets a function that is executed after the route gets switched. Checkout [Hooking to the routing lifecycle](#hooking-to-the-routing-lifecycle) section to see how to use it. |
 | already | function | no | It sets a function that is executed the current route is equal to the one specified. Or in other words - in case you land on the same route again. Checkout [Hooking to the routing lifecycle](#hooking-to-the-routing-lifecycle) section to see how to use it. |
@@ -243,6 +275,14 @@ configureRouter('/my/app');
 ### reset
 
 Calling this function means flushing all the registered routes.
+
+### getRouter
+
+It gives you access to the [Navigo](https://github.com/krasimir/navigo/blob/master/DOCUMENTATION.md) router. Mostly you'll be using `navigate` and `navigateByName` functions. For example:
+
+```js
+getRouter().navigate('/users/list');
+```
 
 ## Examples
 
