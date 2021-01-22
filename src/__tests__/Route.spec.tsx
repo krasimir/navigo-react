@@ -1,10 +1,9 @@
 import React, { useState } from "react";
 import "@testing-library/jest-dom/extend-expect";
 import { render, waitFor, fireEvent, screen } from "@testing-library/react";
-import { getRouter, reset, Route, useNavigo, Base, configureRouter } from "../NavigoReact";
+import { getRouter, reset, Route, useNavigo, Base, configureRouter, Switch } from "../NavigoReact";
 
 import { expectContent, navigate, delay } from "../__tests_helpers__/utils";
-import { Switch } from "../..";
 
 let warn: jest.SpyInstance;
 
@@ -33,7 +32,7 @@ describe("Given navigo-react", () => {
       render(
         <div data-testid="container">
           <Base path="app" />
-          <Route path="/foo/:id" loose>
+          <Route path="/foo/:id">
             <CompA />
           </Route>
           <Route path="/foo/:id">
@@ -69,7 +68,7 @@ describe("Given navigo-react", () => {
         if (count >= 2 && count < 4) {
           return (
             <>
-              <Route path="/foo" loose>
+              <Route path="/foo">
                 <Comp />
               </Route>
               <button onClick={() => setCount(count + 1)}>button</button>
@@ -90,11 +89,8 @@ describe("Given navigo-react", () => {
       );
 
       fireEvent.click(getByText("button"));
-      expectContent("button");
-      await waitFor(() => {
-        fireEvent.click(getByText("button"));
-      });
-      expectContent("No Matchbutton");
+      fireEvent.click(getByText("button"));
+      fireEvent.click(getByText("button"));
       expect(getRouter().routes).toHaveLength(1);
       await waitFor(() => {
         navigate("/foo");
@@ -123,7 +119,7 @@ describe("Given navigo-react", () => {
 
       render(
         <div data-testid="container">
-          <Route path="/foo/:id" loose>
+          <Route path="/foo/:id">
             <Comp />
           </Route>
         </div>
@@ -151,10 +147,10 @@ describe("Given navigo-react", () => {
 
         render(
           <div data-testid="container">
-            <Route path="/about" loose>
+            <Route path="/about">
               <CompA />
             </Route>
-            <Route path="/products" loose>
+            <Route path="/products">
               <CompB />
             </Route>
           </div>
@@ -185,10 +181,10 @@ describe("Given navigo-react", () => {
 
         render(
           <div data-testid="container">
-            <Route path="/about" loose>
+            <Route path="/about">
               <CompA />
             </Route>
-            <Route path="/about" loose>
+            <Route path="/about">
               <CompB />
             </Route>
           </div>
@@ -229,7 +225,7 @@ describe("Given navigo-react", () => {
         const { getByText } = render(
           <div data-testid="container">
             <CompA />
-            <Route path="/about" loose>
+            <Route path="/about">
               <CompB />
             </Route>
           </div>
@@ -244,7 +240,18 @@ describe("Given navigo-react", () => {
     });
   });
   describe("when passing a `before` function", () => {
-    it("should create a before hook and allow us to send props to useNavigo hook", async () => {
+    it("should create a before hook and allow us render with specific args", async () => {
+      const handler = jest.fn().mockImplementation(async ({ render, done }) => {
+        render({ myName: "Krasimir" });
+        await delay(5);
+        waitFor(() => {
+          render({ myName: "Tsonev" });
+        });
+        await delay(5);
+        waitFor(() => {
+          done();
+        });
+      });
       history.pushState({}, "", "/about");
       function Comp() {
         const { match, myName } = useNavigo();
@@ -252,57 +259,40 @@ describe("Given navigo-react", () => {
         if (match) {
           return <p>Hello, {myName}</p>;
         }
-        if (myName) {
-          return <p>Hey, {myName}</p>;
-        }
         return <p>Nope</p>;
       }
 
       render(
         <div data-testid="container">
-          <Route
-            path="/about"
-            loose
-            before={async (done: Function) => {
-              done({ myName: "Krasimir" });
-              await delay(5);
-              waitFor(() => {
-                done({ myName: "Tsonev" });
-              });
-              await delay(5);
-              waitFor(() => {
-                done(true);
-              });
-            }}
-          >
+          <Route path="/about" before={handler}>
             <Comp />
           </Route>
         </div>
       );
 
-      expectContent("Hey, Krasimir");
+      expectContent("Hello, Krasimir");
       await delay(7);
-      expectContent("Hey, Tsonev");
+      expectContent("Hello, Tsonev");
       await delay(20);
       expectContent("Hello, Tsonev");
+      expect(handler).toBeCalledTimes(1);
+      expect(handler).toBeCalledWith({
+        render: expect.any(Function),
+        done: expect.any(Function),
+        match: expect.objectContaining({ url: "about" }),
+      });
     });
     it("should allow us to block the routing", async () => {
       history.pushState({}, "", "/");
       function Comp() {
-        const { match } = useNavigo();
-
-        if (match) {
-          return <p>About</p>;
-        }
-        return <p>Nope</p>;
+        return <p>About</p>;
       }
 
       render(
         <div data-testid="container">
           <Route
             path="/about"
-            loose
-            before={async (done: Function) => {
+            before={({ done }) => {
               done(false);
             }}
           >
@@ -311,9 +301,9 @@ describe("Given navigo-react", () => {
         </div>
       );
 
-      expectContent("Nope");
+      expectContent("");
       getRouter().navigate("/about");
-      expectContent("Nope");
+      expectContent("");
       expect(location.pathname).toEqual("/");
     });
     it("should accumulate state", async () => {
@@ -329,16 +319,15 @@ describe("Given navigo-react", () => {
         <div data-testid="container">
           <Route
             path="/about"
-            loose
-            before={async (done: Function) => {
-              done({ a: "b" });
+            before={async ({ render, done }) => {
+              render({ a: "b" });
               await delay(2);
               waitFor(() => {
-                done({ c: "d" });
+                render({ c: "d" });
               });
               await delay(2);
               waitFor(() => {
-                done(true);
+                done();
               });
             }}
           >
@@ -348,20 +337,33 @@ describe("Given navigo-react", () => {
       );
 
       await delay(20);
-      expect(spy).toBeCalledTimes(4);
-      expect(spy.mock.calls[0][0]).toStrictEqual({ match: false });
-      expect(spy.mock.calls[1][0]).toStrictEqual({ match: false, a: "b" });
-      expect(spy.mock.calls[2][0]).toStrictEqual({ match: false, a: "b", c: "d" });
-      expect(spy.mock.calls[3][0]).toStrictEqual({ match: expect.objectContaining({ url: "about" }), a: "b", c: "d" });
+      expect(spy).toBeCalledTimes(3);
+      expect(spy.mock.calls[0][0]).toStrictEqual({
+        match: expect.objectContaining({ url: "about" }),
+        a: "b",
+        __allowRender: true,
+      });
+      expect(spy.mock.calls[1][0]).toStrictEqual({
+        match: expect.objectContaining({ url: "about" }),
+        a: "b",
+        c: "d",
+        __allowRender: true,
+      });
+      expect(spy.mock.calls[2][0]).toStrictEqual({
+        match: expect.objectContaining({ url: "about" }),
+        a: "b",
+        c: "d",
+        __allowRender: true,
+      });
     });
     it("should keep the scope of the before hook and give access to the latest state values", () => {
       history.pushState({}, "", "/");
       const spy = jest.fn();
       function Comp() {
         const [count, setCount] = useState(0);
-        const before = (cb: Function) => {
+        const before = ({ done }) => {
           spy(count);
-          cb(true);
+          done();
         };
 
         return (
@@ -369,11 +371,12 @@ describe("Given navigo-react", () => {
             <a href="/about" data-navigo>
               about
             </a>
-            <Route path="/about" loose before={before}>
-              <button onClick={() => setCount(count + 1)} data-testid="c">
-                click me {count}
-              </button>
+            <Route path="/about" before={before}>
+              About page
             </Route>
+            <button onClick={() => setCount(count + 1)} data-testid="c">
+              click me {count}
+            </button>
           </>
         );
       }
@@ -396,7 +399,7 @@ describe("Given navigo-react", () => {
       const spy = jest.fn();
       function Comp() {
         const [count, setCount] = useState(0);
-        const after = (cb: Function) => {
+        const after = ({ render }) => {
           spy(count);
         };
 
@@ -405,11 +408,12 @@ describe("Given navigo-react", () => {
             <a href="/about" data-navigo>
               about
             </a>
-            <Route path="/about" loose after={after}>
-              <button onClick={() => setCount(count + 1)} data-testid="c">
-                click me {count}
-              </button>
+            <Route path="/about" after={after}>
+              About
             </Route>
+            <button onClick={() => setCount(count + 1)} data-testid="c">
+              click me {count}
+            </button>
           </>
         );
       }
@@ -426,13 +430,14 @@ describe("Given navigo-react", () => {
       fireEvent.click(getByText("about"));
       expect(spy).toBeCalledTimes(1);
       expect(spy).toBeCalledWith(3);
+      expectContent("aboutAboutclick me 3");
     });
     it("should keep the scope of the already hook and give access to the latest state values", () => {
       history.pushState({}, "", "/");
       const spy = jest.fn();
       function Comp() {
         const [count, setCount] = useState(0);
-        const already = (cb: Function) => {
+        const already = ({ render }) => {
           spy(count);
         };
 
@@ -441,11 +446,12 @@ describe("Given navigo-react", () => {
             <a href="/about" data-navigo>
               about
             </a>
-            <Route path="/about" loose already={already}>
-              <button onClick={() => setCount(count + 1)} data-testid="c">
-                click me {count}
-              </button>
+            <Route path="/about" already={already}>
+              About
             </Route>
+            <button onClick={() => setCount(count + 1)} data-testid="c">
+              click me {count}
+            </button>
           </>
         );
       }
@@ -463,23 +469,25 @@ describe("Given navigo-react", () => {
       fireEvent.click(getByText("about"));
       expect(spy).toBeCalledTimes(1);
       expect(spy).toBeCalledWith(3);
+      expectContent("aboutAboutclick me 3");
     });
     it("should keep the scope of the leave hook and give access to the latest state values", () => {
       history.pushState({}, "", "/about");
       const spy = jest.fn();
       function Comp() {
         const [count, setCount] = useState(0);
-        const leave = (cb: Function) => {
+        const leave = ({ render, done }) => {
           spy(count);
         };
 
         return (
           <>
-            <Route path="/about" loose leave={leave}>
-              <button onClick={() => setCount(count + 1)} data-testid="c">
-                click me {count}
-              </button>
+            <Route path="/about" leave={leave}>
+              About
             </Route>
+            <button onClick={() => setCount(count + 1)} data-testid="c">
+              click me {count}
+            </button>
           </>
         );
       }
@@ -492,7 +500,7 @@ describe("Given navigo-react", () => {
       fireEvent.click(getByTestId("c"));
       fireEvent.click(getByTestId("c"));
       fireEvent.click(getByTestId("c"));
-      expectContent("click me 3");
+      expectContent("Aboutclick me 3");
       getRouter().navigate("/nope");
       expect(spy).toBeCalledTimes(1);
       expect(spy).toBeCalledWith(3);
@@ -500,11 +508,11 @@ describe("Given navigo-react", () => {
   });
   describe("when passing `after`", () => {
     it("should create an after hook and allow us to send props to useNavigo hook", async () => {
-      history.pushState({}, "", "/");
+      history.pushState({}, "", "/about");
       function Comp() {
         const { match, userName } = useNavigo();
 
-        if (match && userName) {
+        if (userName) {
           return <p>Hey, {userName}</p>;
         }
         return <p>Nope</p>;
@@ -514,9 +522,11 @@ describe("Given navigo-react", () => {
         <div data-testid="container">
           <Route
             path="/about"
-            loose
-            after={async (done: Function) => {
-              done({ userName: "Foo Bar" });
+            after={async ({ render }) => {
+              await delay(10);
+              await waitFor(() => {
+                render({ userName: "Foo Bar" });
+              });
             }}
           >
             <Comp />
@@ -525,19 +535,17 @@ describe("Given navigo-react", () => {
       );
 
       expectContent("Nope");
-      await waitFor(() => {
-        getRouter().navigate("/about");
-      });
+      await delay(20);
       expectContent("Hey, Foo Bar");
     });
   });
   describe("when passing `already`", () => {
     it("should create an already hook and allow us to send props to useNavigo hook", async () => {
-      history.pushState({}, "", "/");
+      history.pushState({}, "", "/about");
       function Comp() {
-        const { match, again } = useNavigo();
+        const { again } = useNavigo();
 
-        if (match && again) {
+        if (again) {
           return <p>Rendering again</p>;
         }
         return <p>Nope</p>;
@@ -547,9 +555,8 @@ describe("Given navigo-react", () => {
         <div data-testid="container">
           <Route
             path="/about"
-            loose
-            already={async (done: Function) => {
-              done({ again: true });
+            already={async ({ render }) => {
+              render({ again: true });
             }}
           >
             <Comp />
@@ -560,22 +567,18 @@ describe("Given navigo-react", () => {
       expectContent("Nope");
       await waitFor(() => {
         getRouter().navigate("/about");
-        getRouter().navigate("/about");
       });
       expectContent("Rendering again");
     });
   });
   describe("when passing a `leave` function", () => {
     it("should create a leave hook and allow us to send props to useNavigo hook", async () => {
-      history.pushState({}, "", "/");
+      history.pushState({}, "", "/about");
       function Comp() {
-        const { match, leaving } = useNavigo();
+        const { leaving } = useNavigo();
 
         if (leaving) {
           return <p>Leaving...</p>;
-        }
-        if (match) {
-          return <p>Match</p>;
         }
         return <p>Nope</p>;
       }
@@ -584,13 +587,12 @@ describe("Given navigo-react", () => {
         <div data-testid="container">
           <Route
             path="/about"
-            loose
-            leave={async (done: Function) => {
-              done({ leaving: true });
+            leave={async ({ render, done }) => {
+              render({ leaving: true });
               await delay(10);
               waitFor(() => {
-                done({ leaving: false });
-                done(true);
+                render({ leaving: false });
+                done();
               });
             }}
           >
@@ -601,10 +603,6 @@ describe("Given navigo-react", () => {
 
       expectContent("Nope");
       await waitFor(() => {
-        getRouter().navigate("/about");
-      });
-      expectContent("Match");
-      await waitFor(() => {
         getRouter().navigate("/nah");
       });
       expectContent("Leaving...");
@@ -612,25 +610,16 @@ describe("Given navigo-react", () => {
       expectContent("Nope");
     });
     it("should allow us to block the routing", async () => {
-      history.pushState({}, "", "/");
+      history.pushState({}, "", "/about");
       function Comp() {
-        const { match, leaving } = useNavigo();
-
-        if (leaving) {
-          return <p>Leaving...</p>;
-        }
-        if (match) {
-          return <p>Match</p>;
-        }
-        return <p>Nope</p>;
+        return <p>Not leaving!</p>;
       }
 
       render(
         <div data-testid="container">
           <Route
             path="/about"
-            loose
-            leave={async (done: Function) => {
+            leave={async ({ done }) => {
               done(false);
             }}
           >
@@ -639,15 +628,11 @@ describe("Given navigo-react", () => {
         </div>
       );
 
-      expectContent("Nope");
-      await waitFor(() => {
-        getRouter().navigate("/about");
-      });
-      expectContent("Match");
+      expectContent("Not leaving!");
       await waitFor(() => {
         getRouter().navigate("/nah");
       });
-      expectContent("Match");
+      expectContent("Not leaving!");
       expect(location.pathname).toEqual("/about");
     });
   });
