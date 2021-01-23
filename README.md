@@ -22,7 +22,6 @@
   - [Examples](#examples)
     - [Basic example](#basic-example)
     - [Accessing URL and GET parameters](#accessing-url-and-get-parameters)
-    - [Using the `loose` property](#using-the-loose-property)
     - [Redirecting](#redirecting)
     - [Get data required by a Route](#get-data-required-by-a-route)
     - [Block opening a route](#block-opening-a-route)
@@ -42,16 +41,11 @@ export default function App() {
       </nav>
       <Switch>
         <Route path="/package">
-          <ul>
-            <li>Size: ~15KB</li>
-            <li>Dependencies: no</li>
-            <li>
-              Documentation: <a href="https://github.com/krasimir/navigo-react">here</a>
-            </li>
-          </ul>
+          Package documentation <a href="https://github.com/krasimir/navigo-react">here</a>.
         </Route>
         <Route path="/">
-          NavigoReact is a router for React applications based on Navigo project.
+          NavigoReact is a router for React applications based on Navigo
+          project.
         </Route>
       </Switch>
     </>
@@ -66,7 +60,7 @@ Live demo here [https://codesandbox.io/s/navigo-react-example-w9l1d](https://cod
 The navigation in Navigo happens in two ways:
 
 * Via `<a>` tags. The only requirement is to add `data-navigo` attribute to the link. For example `<a href="/users/list" data-navigo>View users</a>`. For more details on the exact API check out [this page](https://github.com/krasimir/navigo/blob/master/DOCUMENTATION.md#augment-your-a-tags).
-* Via the `navigate` or `navigateByName` methods. First you have to access the router with `getRouter()` and then use one of those two methods. For example:
+* Via the `navigate` or `navigateByName` methods. First you have to access the router with `getRouter()` and then use one of these two methods. For example:
 ```js
 import { getRouter } from 'navigo-react';
 
@@ -96,7 +90,6 @@ import { getRouter } from 'navigo-react';
 ```jsx
 <Route
   path="/user/:id"
-  loose="false"
   name="my-route-name"
   before={ (cb) => {} }
   after={ (cb) => {} }
@@ -111,7 +104,6 @@ The basic building block. Shortly, it's a component that renders its children ba
 | Prop | type | required | Description |
 | ---- | ---- | -------- | ----------- |
 | **path** | string | yes | Specifies the path for which the children will be rendered. URL parameters are supported with the well known syntax `/users/:id/:action`. You can access the values via the [useNavigo](#usenavigo) hook |
-| loose | boolean | no | By default is `false` and if you provide `true` will always render its children. This is useful when you want to render stuff in case a specific route is NOT matching. Check out the [example below](#using-the-loos-property). |
 | name | string | no | Sets a name of the route so we can later navigate to it easily. Check out [this section]() for an example |
 | before | function | no | It sets a function that is executed before the route gets switched. Checkout [Hooking to the routing lifecycle](#hooking-to-the-routing-lifecycle) section to see how to use it. |
 | after | function | no | It sets a function that is executed after the route gets switched. Checkout [Hooking to the routing lifecycle](#hooking-to-the-routing-lifecycle) section to see how to use it. |
@@ -120,35 +112,56 @@ The basic building block. Shortly, it's a component that renders its children ba
 
 #### Route lifecycle functions
 
-The `before`, `after`, `already` and `leave` are functions that execute during the route resolving. They give you the opportunity to hook some logic to each one of this moments and even pause/reject some of them. Each of this functions receive a callback. You fire the callback with an object, key-value pairs. Those pairs could be accessed via the `useNavigo` hook. For example:
+The `before`, `after`, `already` and `leave` are functions that execute during the route resolving. They give you the opportunity to hook some logic to each one of this moments and pause/reject some of them. Each of this functions receive an object:
+
+| function | example |
+| -------- | ------- |
+| before | `function handleBefore({ render, done, match }) {...}` |
+| after | `function handleBefore({ render, match }) {...}` |
+| already | `function handleBefore({ render, match }) {...}` |
+| leave | `function handleBefore({ render, done, match }) {...}` |
+
+Where `render` gives you an opportunity to render the children of the `<Route>` by setting data into the Navigo context. For example:
 
 ```jsx
-function Print() {
-  const { fact, loading } = useNavigo();
+import { Route, useNavigo } from "navigo-react";
 
-  if (loading) return <p>Loading ...</p>;
-  if (fact) return <p>{fact}</p>;
-  return null;
+function Print() {
+  const { pic } = useNavigo();
+
+  if (pic === null) {
+    return <p>Loading ...</p>;
+  }
+  return <img src={pic} width="200" />;
 }
 
-// Somewhere above
-<Route
-  path="/cats"
-  loose
-  before={async (cb) => {
-    cb({ loading: true });
-    const res = await (await fetch("https://catfact.ninja/fact")).json();
-    cb({ fact: res.fact, loading: false });
-    cb(true);
-  }}
->
-  <Print />
-</Route>
+export default function App() {
+  async function before({ render, done }) {
+    render({ pic: null });
+    const res = await (
+      await fetch("https://api.thecatapi.com/v1/images/search")
+    ).json();
+    render({ pic: res[0].url });
+    done();
+  }
+  return (
+    <>
+      <nav>
+        <a href="/cat" data-navigo>
+          Get a cat fact
+        </a>
+      </nav>
+      <Route path="/cat" before={before}>
+        <Print />
+      </Route>
+    </>
+  );
+}
 ```
 
-Every `cb` call is basically re-rendering the `<Print>` component and `useNavigo` hook returns whatever we passed as argument. At the end when we are ready we call `cb` with `true` which indicates to the router that our job is done. Full example [here](#get-data-required-by-a-route).
+Pay attention to the `before` function inside the `<App>` component. `render` calls trigger rendering of the `<Print>` component with specific context which we can access via the `useNavigo` hook. Finally when we are ready we call `done()` to indicate that the routing could be fully resolved. Which means changing the browser's URL and potentially executing `after` or `already` lifecycle methods.
 
-We may block the routing to specific paths if we call `cb` with `false`. For example:
+We can completely block the routing to specific place by calling `done(false)`. For example:
 
 ```jsx
 export default function App() {
@@ -220,7 +233,7 @@ It indirectly calls the `navigate` method of the router. Checkout [redirecting](
 
 ### useNavigo
 
-`useNavigo` is a hook that gives you access to a [Match](https://github.com/krasimir/navigo/blob/master/DOCUMENTATION.md#match) object. You have to use it in a component that is somewhere below a `<Route>` component. Then `match` has a value and you can pull information for the matched route. For example:
+`useNavigo` is a hook that gives you access to the Navigo context. The main role of the context is to pass a [Match](https://github.com/krasimir/navigo/blob/master/DOCUMENTATION.md#match) object. It gives you access to the matched URL, URL and GET parameters. For example:
 
 ```js
 import { Route, useNavigo } from "navigo-react";
@@ -249,10 +262,7 @@ export default function App() {
 }
 ```
 
-`useNavigo` has one other function. It gives you access to the props that you send via the router [lifecycle functions](#route-lifecycle-functions). Here are a two examples that demonstrate the idea:
-
-* [Get data required by a Route](#get-data-required-by-a-route)
-* [Block opening a route](#block-opening-a-route)
+The Navigo context also gives you access to key-value paris that we send via the router [lifecycle functions](#route-lifecycle-functions). Check out this example [Get data required by a Route](#get-data-required-by-a-route).
 
 ### useLocation
 
@@ -350,9 +360,31 @@ export default function App() {
 
 https://codesandbox.io/s/navigo-url-and-get-parameters-5few6
 
-### Using the `loose` property
-
 ### Redirecting
+
+```jsx
+import { Route, Switch, Redirect } from "navigo-react";
+
+export default function App() {
+  return (
+    <>
+      <nav>
+        <a href="/user" data-navigo>
+          View user
+        </a>
+      </nav>
+      <Switch>
+        <Route path="/user">
+          <Redirect path="/foobar" />
+        </Route>
+        <Route path="/foobar">Hey user!</Route>
+      </Switch>
+    </>
+  );
+}
+```
+
+https://codesandbox.io/s/navigo-redirecting-cxzbb
 
 ### Get data required by a Route
 
@@ -360,35 +392,31 @@ https://codesandbox.io/s/navigo-url-and-get-parameters-5few6
 import { Route, useNavigo } from "navigo-react";
 
 function Print() {
-  const { fact, loading } = useNavigo();
+  const { pic } = useNavigo();
 
-  if (loading) {
+  if (pic === null) {
     return <p>Loading ...</p>;
   }
-  if (fact) {
-    return <p>{fact}</p>;
-  }
-  return null;
+  return <img src={pic} width="200" />;
 }
 
 export default function App() {
+  async function before({ render, done }) {
+    render({ pic: null });
+    const res = await (
+      await fetch("https://api.thecatapi.com/v1/images/search")
+    ).json();
+    render({ pic: res[0].url });
+    done();
+  }
   return (
     <>
       <nav>
-        <a href="/cats" data-navigo>
+        <a href="/cat" data-navigo>
           Get a cat fact
         </a>
       </nav>
-      <Route
-        path="/cats"
-        loose
-        before={async (cb) => {
-          cb({ loading: true });
-          const res = await (await fetch("https://catfact.ninja/fact")).json();
-          cb({ fact: res.fact, loading: false });
-          cb(true);
-        }}
-      >
+      <Route path="/cat" before={before}>
         <Print />
       </Route>
     </>
@@ -403,19 +431,12 @@ https://codesandbox.io/s/navigo-before-lifecycle-function-hgeld
 The user can't go to `/user` route before the `authorized` becomes `true`.
 
 ```jsx
-import { Route, useNavigo } from "navigo-react";
-
-function User() {
-  const { match } = useNavigo();
-  if (match) {
-    return <p>I'm a user</p>;
-  }
-  return null;
-}
+import { Route } from "navigo-react";
 
 export default function App() {
-  const [authorized, loggedIn] = useState(false);
-  const before = (cb) => cb(authorized);
+  const before = ({ done }) => {
+    done(false);
+  };
 
   return (
     <>
@@ -423,10 +444,9 @@ export default function App() {
         <a href="/user" data-navigo>
           Access user
         </a>
-        {!authorized && <button onClick={() => loggedIn(true)}>Sign in</button>}
       </nav>
-      <Route path="/user" loose before={before}>
-        <User />
+      <Route path="/user" before={before}>
+        Hey user!!!
       </Route>
     </>
   );
@@ -441,6 +461,12 @@ https://codesandbox.io/s/navigo-block-routing-e2qvw
 import { Route, Switch, useNavigo } from "navigo-react";
 
 const delay = (time) => new Promise((done) => setTimeout(done, time));
+
+const leaveHook = async ({ render, done }) => {
+  render({ leaving: true });
+  await delay(900);
+  done();
+};
 
 function Card({ children, bgColor }) {
   const { leaving } = useNavigo();
@@ -458,12 +484,6 @@ function Card({ children, bgColor }) {
   );
 }
 
-const leaveHook = async (done) => {
-  done({ leaving: true });
-  await delay(900);
-  done(true);
-};
-
 export default function App() {
   return (
     <>
@@ -471,14 +491,19 @@ export default function App() {
         <Route path="/card-two" leave={leaveHook}>
           <Card bgColor="#254c6a">
             Card #2.
-            <a href="/" data-navigo>Click here</a>
+            <br />
+            <a href="/" data-navigo>
+              Click here
+            </a>{" "}
             to go back
           </Card>
         </Route>
         <Route path="/" leave={leaveHook}>
           <Card bgColor="#1f431f">
-            Welcome to the transition example.
-            <a href="/card-two" data-navigo>Click here</a>{" "}
+            Welcome to the transition example.{" "}
+            <a href="/card-two" data-navigo>
+              Click here
+            </a>{" "}
             to open the other card.
           </Card>
         </Route>
