@@ -428,7 +428,7 @@ https://codesandbox.io/s/navigo-before-lifecycle-function-hgeld
 
 ### Block opening a route
 
-The user can't go to `/user` route before the `authorized` becomes `true`.
+The user can't go to `/user` route.
 
 ```jsx
 import { Route } from "navigo-react";
