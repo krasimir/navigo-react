@@ -71,10 +71,10 @@ describe("Given navigo-react", () => {
 
       render(
         <div data-testid="container">
-          <Route path="/about" loose>
+          <Route path="/about">
             <About />
           </Route>
-          <Route path="/about/team" loose>
+          <Route path="/about/team">
             <Team />
           </Route>
           <Route path="/about/team">Team-footer</Route>
@@ -92,7 +92,7 @@ describe("Given navigo-react", () => {
       history.pushState({}, "", "/nah");
       render(
         <div data-testid="container">
-          <Route path="/about" loose>
+          <Route path="/about">
             <About />
           </Route>
           <NotFound>
@@ -127,7 +127,7 @@ describe("Given navigo-react", () => {
       render(
         <div data-testid="container">
           <Auth>
-            <Route path="/about" loose>
+            <Route path="/about">
               <About />
             </Route>
           </Auth>

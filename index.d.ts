@@ -1,15 +1,5 @@
 import Navigo, { Match, RouteHooks } from "navigo";
 
-export type RouteProps = {
-  path: string;
-  children: any;
-  name?: string;
-  loose?: boolean;
-  before?: Function;
-  after?: Function;
-  already?: Function;
-  leave?: Function;
-};
 export type NotFoundRouteProps = {
   children: any;
   hooks?: RouteHooks;
@@ -22,6 +12,19 @@ export type Path = { path: string };
 export type NavigoRouting = {
   match: false | Match;
   [key: string]: Any;
+};
+export type BlockingLifecycleFuncArgs = { render: Function; done: Function; match: Match };
+export type NonBlockingLifecycleFuncArgs = { render: Function; match: Match };
+export type BlockingLifecycleFunc = (arg: BlockingLifecycleFuncArgs) => void;
+export type NonBlockingLifecycleFunc = (arg: NonBlockingLifecycleFuncArgs) => void;
+export type RouteProps = {
+  path: string;
+  children: any;
+  name?: string;
+  before?: BlockingLifecycleFunc;
+  after?: NonBlockingLifecycleFunc;
+  already?: NonBlockingLifecycleFunc;
+  leave?: BlockingLifecycleFunc;
 };
 
 // utils

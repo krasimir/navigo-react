@@ -33,7 +33,7 @@ describe("Given navigo-react", () => {
 
       render(
         <div data-testid="container">
-          <Route path="/about" loose>
+          <Route path="/about">
             <About />
           </Route>
           <NotFound>

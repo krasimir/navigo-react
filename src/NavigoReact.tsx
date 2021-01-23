@@ -38,7 +38,7 @@ export function reset() {
 }
 
 // components
-export function Route({ path, children, loose, before, after, already, leave, name }: RouteProps) {
+export function Route({ path, children, before, after, already, leave, name }: RouteProps) {
   const route = useRef<NavigoRoute | undefined>(undefined);
   const [context, setContext] = useReducer((state: NavigoRouting, action: NavigoRouting) => ({ ...state, ...action }), {
     match: false,
@@ -46,23 +46,20 @@ export function Route({ path, children, loose, before, after, already, leave, na
   const switchContext = useContext(SwitchContext);
   const renderChild = () => <Context.Provider value={context}>{children}</Context.Provider>;
   const noneBlockingHook = (func: Function) => (match: Match) => {
-    func((result: any) => {
-      if (typeof result === "object" && result !== null) {
-        setContext(result);
-      }
-    }, match);
+    func({
+      render: (result: any) => setContext({ ...result, match }),
+      match,
+    });
   };
   const blockingHook = (func: Function) => (done: Function, match: Match) => {
-    // @ts-ignore
-    func((result: any) => {
-      if (typeof result === "boolean") {
-        done(result);
-      } else if (typeof result === "object" && result !== null) {
-        setContext(result);
-      }
-    }, match);
+    func({
+      render: (result: any) => setContext({ ...result, match, __allowRender: true }),
+      done,
+      match,
+    });
   };
 
+  // creating the route + attaching hooks
   useEffect(() => {
     let isMounted = true;
     const router = getRouter();
@@ -129,7 +126,7 @@ export function Route({ path, children, loose, before, after, already, leave, na
     }
   }, [before, after, already, leave]);
 
-  if (loose) {
+  if (context.__allowRender) {
     return renderChild();
   } else if (switchContext.isInSwitch && context.match) {
     if (switchContext.switchMatch) {
