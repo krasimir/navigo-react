@@ -361,7 +361,7 @@ describe("Given navigo-react", () => {
       const spy = jest.fn();
       function Comp() {
         const [count, setCount] = useState(0);
-        const before = ({ done }) => {
+        const before = ({ done }: { done: Function }) => {
           spy(count);
           done();
         };
@@ -399,7 +399,7 @@ describe("Given navigo-react", () => {
       const spy = jest.fn();
       function Comp() {
         const [count, setCount] = useState(0);
-        const after = ({ render }) => {
+        const after = ({ render }: { render: Function }) => {
           spy(count);
         };
 
@@ -437,7 +437,7 @@ describe("Given navigo-react", () => {
       const spy = jest.fn();
       function Comp() {
         const [count, setCount] = useState(0);
-        const already = ({ render }) => {
+        const already = ({ render }: { render: Function }) => {
           spy(count);
         };
 
@@ -476,7 +476,7 @@ describe("Given navigo-react", () => {
       const spy = jest.fn();
       function Comp() {
         const [count, setCount] = useState(0);
-        const leave = ({ render, done }) => {
+        const leave = ({ render, done }: { done: Function; render: Function }) => {
           spy(count);
         };
 
