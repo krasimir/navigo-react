@@ -8,6 +8,7 @@
   - [Components](#components)
     - [Route](#route)
       - [Route lifecycle functions](#route-lifecycle-functions)
+      - [Navigating using named routes](#navigating-using-named-routes)
     - [Switch](#switch)
     - [Base](#base)
     - [NotFound](#notfound)
@@ -104,7 +105,7 @@ The basic building block. Shortly, it's a component that renders its children ba
 | Prop | type | required | Description |
 | ---- | ---- | -------- | ----------- |
 | **path** | string | yes | Specifies the path for which the children will be rendered. URL parameters are supported with the well known syntax `/users/:id/:action`. You can access the values via the [useNavigo](#usenavigo) hook |
-| name | string | no | Sets a name of the route so we can later navigate to it easily. Check out [this section]() for an example |
+| name | string | no | Sets a name of the route so we can later navigate to it easily. Check out [this section](#navigating-using-named-routes) for an example |
 | before | function | no | It sets a function that is executed before the route gets switched. Checkout [Hooking to the routing lifecycle](#route-lifecycle-functions) section to see how to use it. |
 | after | function | no | It sets a function that is executed after the route gets switched. Checkout [Hooking to the routing lifecycle](#route-lifecycle-functions) section to see how to use it. |
 | already | function | no | It sets a function that is executed the current route is equal to the one specified. Or in other words - in case you land on the same route again. Checkout [Hooking to the routing lifecycle](#route-lifecycle-functions) section to see how to use it. |
@@ -184,6 +185,33 @@ export default function App() {
 }
 ```
 (Full example [here](#block-opening-a-route))
+
+#### Navigating using named routes
+
+Sometimes we need to construct a URL based on some data. The library offers an imperative API for that:
+
+```jsx
+import { getRouter, Route } from "navigo-react";
+
+export default function App() {
+  return (
+    <>
+      <button
+        onClick={() => {
+          getRouter().navigateByName("my-user", { id: "xxx" });
+        }}
+      >
+        Click me
+      </button>
+      <Route path="/user/:id" name="my-user">
+        I'm a user
+      </Route>
+    </>
+  );
+}
+```
+
+https://codesandbox.io/s/navigo-react-named-routes-0h2bh
 
 ### Switch
 
