@@ -105,10 +105,10 @@ The basic building block. Shortly, it's a component that renders its children ba
 | ---- | ---- | -------- | ----------- |
 | **path** | string | yes | Specifies the path for which the children will be rendered. URL parameters are supported with the well known syntax `/users/:id/:action`. You can access the values via the [useNavigo](#usenavigo) hook |
 | name | string | no | Sets a name of the route so we can later navigate to it easily. Check out [this section]() for an example |
-| before | function | no | It sets a function that is executed before the route gets switched. Checkout [Hooking to the routing lifecycle](#hooking-to-the-routing-lifecycle) section to see how to use it. |
-| after | function | no | It sets a function that is executed after the route gets switched. Checkout [Hooking to the routing lifecycle](#hooking-to-the-routing-lifecycle) section to see how to use it. |
-| already | function | no | It sets a function that is executed the current route is equal to the one specified. Or in other words - in case you land on the same route again. Checkout [Hooking to the routing lifecycle](#hooking-to-the-routing-lifecycle) section to see how to use it. |
-| leave | function | no | It sets a function that is executed when the user is about to leave the route. Checkout [Hooking to the routing lifecycle](#hooking-to-the-routing-lifecycle) section to see how to use it. |
+| before | function | no | It sets a function that is executed before the route gets switched. Checkout [Hooking to the routing lifecycle](#route-lifecycle-functions) section to see how to use it. |
+| after | function | no | It sets a function that is executed after the route gets switched. Checkout [Hooking to the routing lifecycle](#route-lifecycle-functions) section to see how to use it. |
+| already | function | no | It sets a function that is executed the current route is equal to the one specified. Or in other words - in case you land on the same route again. Checkout [Hooking to the routing lifecycle](#route-lifecycle-functions) section to see how to use it. |
+| leave | function | no | It sets a function that is executed when the user is about to leave the route. Checkout [Hooking to the routing lifecycle](#route-lifecycle-functions) section to see how to use it. |
 
 #### Route lifecycle functions
 
@@ -428,7 +428,7 @@ https://codesandbox.io/s/navigo-before-lifecycle-function-hgeld
 
 ### Block opening a route
 
-The user can't go to `/user` route before the `authorized` becomes `true`.
+The user can't go to `/user` route.
 
 ```jsx
 import { Route } from "navigo-react";
