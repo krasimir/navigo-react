@@ -37,7 +37,7 @@ export function Base(props: Path);
 export function Route(props: RouteProps);
 export function NotFound(props: NotFoundRouteProps);
 export function Redirect(props: Path);
-export function Switch(props: { children: any });
+export function Switch(props: { children?: any });
 
 // hooks
 export function useNavigo(): NavigoRouting;
