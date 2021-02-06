@@ -1,6 +1,6 @@
 {
   "name": "navigo-react",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "main": "lib/cjs/NavigoReact.js",
   "browser": "lib/NavigoReact.min.js",
   "module": "lib/es/NavigoReact.js",

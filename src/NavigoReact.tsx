@@ -146,7 +146,7 @@ export function Base({ path }: Path) {
   getRouter(path);
   return null;
 }
-export function Switch({ children }: { children: any }) {
+export function Switch({ children }: { children?: any }) {
   const [match, setMatch] = useState<Match | false>(false);
   useEffect(() => {
     function switchHandler(match: Match) {

@@ -19,7 +19,7 @@ export type BlockingLifecycleFunc = (arg: BlockingLifecycleFuncArgs) => void;
 export type NonBlockingLifecycleFunc = (arg: NonBlockingLifecycleFuncArgs) => void;
 export type RouteProps = {
   path: string;
-  children: any;
+  children?: any;
   name?: string;
   before?: BlockingLifecycleFunc;
   after?: NonBlockingLifecycleFunc;
